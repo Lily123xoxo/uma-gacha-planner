@@ -21,7 +21,6 @@ const calculatePlanner = (req, res) => {
     silverCleat
   } = req.body;
 
-  // Pass data to your gacha logic
   const rollsAccumulated = gachaService.calculateRolls({
     carats: Number(carats),
     clubRank: clubRank,
@@ -43,8 +42,7 @@ const calculatePlanner = (req, res) => {
 
 };
 
-// use either Json or DB for timeline data
-// Example timeline data, replace with actual data source
+// use either Json or DB for timeline data, example below
 const timelineData = [ 
   { name: 'Maruzensky (Summer)', start: '2025-08-01', end: '2025-08-10' },
   { name: 'Kitasan Black (SSR)', start: '2025-08-11', end: '2025-08-20' }
