@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uma Musume Gacha Planner</title>
+  <link rel="stylesheet" href="/css/css-reset.css">
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <main>
+        <!-- Add ID for JS -->
+        <form id="planner-form">
+            <label for="carats">Current Carats:</label>
+            <input type="number" name="carats" id="carats" required>
+
+            <label for="clubRank">Club Rank:</label>
+            <select name="clubRank" id="clubRank" required>
+            <option value="" disabled selected>Select a value</option>
+                <option value="SS">SS</option>
+                <option value="Splus">S+</option>
+                <option value="S">S</option>
+                <option value="Aplus">A+</option>
+                <option value="A">A</option>
+                <option value="Bplus">B+</option>
+                <option value="B">B</option>
+                <option value="Cplus">C+</option>
+                <option value="C">C</option>
+                <option value="Dplus">D+</option>
+            </select>
+
+            <label for="champMeeting">Expected CM Carat Gains:</label>
+            <select name="champMeeting" id="champMeeting" required>
+                <option value="" disabled selected>Select a value</option>
+                <option value="2500">2500</option>
+                <option value="1800">1800</option>
+                <option value="1200">1200</option>
+                <option value="1000">1000</option>
+            </select>
+
+            <div>
+                <input type="checkbox" name="monthlyPass" id="monthlyPass" value="true">
+                <label for="monthlyPass">I have the monthly pass</label>
+
+                <br>
+
+                <input type="checkbox" name="dailyLogin" id="dailyLogin" value="true">
+                <label for="dailyLogin">I collect daily login rewards</label>
+
+                <br>
+
+                <input type="checkbox" name="legendRace" id="legendRace" value="true">
+                <label for="legendRace">I win my legend races</label>
+
+                <br>
+
+                <input type="checkbox" name="dailyMission" id="dailyMission" value="true">
+                <label for="dailyMission">I do my daily missions</label>
+
+                <br>
+
+                <input type="checkbox" name="rainbowCleat" id="rainbowCleat" value="true">
+                <label for="rainbowCleat">I buy four tickets/rolls with Rainbow Cleats every month</label>
+
+                <br>
+
+                <input type="checkbox" name="goldCleat" id="goldCleat" value="true">
+                <label for="goldCleat">I buy four tickets/rolls with Gold Cleats every month</label>
+
+                <br>
+
+                <input type="checkbox" name="silverCleat" id="silverCleat" value="true">
+                <label for="silverCleat">I buy four tickets/rolls with Silver Cleats every month</label>
+            </div>
+
+            <button type="submit">Calculate</button>
+        </form>
+        <script src="/js/index.js"></script> <!-- AJAX POST script-->
+
+        <!-- Add result display -->
+        <div id="result" class="mt-3"></div>
+
+    </main>
+
+    <!-- app/views/partials/timeline.ejs -->
+    <%- include('../partials/timeline', { timeline: timeline }) %>
+
+</body>
+</html>

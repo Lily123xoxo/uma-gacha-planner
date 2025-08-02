@@ -1,0 +1,13 @@
+<div class="timeline mt-4">
+  <h2>Upcoming Banners</h2>
+  <ul>
+    <% timeline.forEach((banner, i) => { %>
+      <li>
+        <input type="radio" name="bannerSelect" id="banner-<%= i %>" value="<%= banner.start %>">
+        <label for="banner-<%= i %>">
+          <%= banner.name %> (<%= banner.start %> → <%= banner.end %>)
+        </label>
+      </li>
+    <% }) %>
+  </ul>
+</div>
