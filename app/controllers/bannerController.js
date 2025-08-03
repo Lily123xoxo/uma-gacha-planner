@@ -1,4 +1,4 @@
-const bannerDAO = require('../dao/bannerDAO');
+const bannerDAO = require('../dao/bannerDao');
 
 async function getCharacterBanners(req, res) {
   try {

@@ -1,0 +1,36 @@
+.timeline-scroll {
+display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1rem;
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE and Edge */
+  cursor: grab;
+}
+
+.timeline-scroll.dragging {
+  cursor: grabbing;
+}
+
+.timeline-scroll::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari, Opera */
+}
+
+.timeline-card {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+.timeline-card .card {
+  text-align: center;
+  border-radius: 0.75rem;
+  border: 1px solid #ddd;
+}
+
+.timeline-card h6 {
+  font-weight: 600;
+}
+
+.timeline-card p {
+  font-size: 0.85rem;
+}

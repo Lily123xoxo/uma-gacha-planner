@@ -1,5 +1,5 @@
 // app/cache/bannerCache.js
-const bannerDAO = require('../dao/bannerDAO');
+const bannerDAO = require('../dao/bannerDao');
 
 let characterBanners = [];
 let supportBanners = [];
