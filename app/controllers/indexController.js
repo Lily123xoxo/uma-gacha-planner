@@ -3,7 +3,7 @@ const gachaService = require('../services/gachaService');
 
 // Render the main page
 const getIndexPage = (req, res) => {
-  res.render('pages/index', { timeline: timelineData}); // first load
+  res.render('pages/index', {timeline: timelineData}); // first load
 };
 
 // Handle calculation requests

@@ -23,7 +23,7 @@ function calculateRolls(options) {
 
   if (options.monthlyPass) totalCarats += 2000 // per month
   if (options.dailyLogin) totalCarats += 110 // per week
-  if (options.legendRace) totalCarats += 250 // per month?
+  if (options.legendRace) totalCarats += 1000 // 250 per race, assumes 4 new races per month
   if (options.dailyMission) totalCarats += 30 // per day
   if (options.rainbowCleat) totalCarats += 600 // per month
   if (options.goldCleat) totalCarats += 600 // per month
