@@ -1,13 +1,21 @@
-<div class="timeline mt-4">
-  <h2>Upcoming Banners</h2>
-  <ul>
-    <% timeline.forEach((banner, i) => { %>
-      <li>
-        <input type="radio" name="bannerSelect" id="banner-<%= i %>" value="<%= banner.start %>">
-        <label for="banner-<%= i %>">
-          <%= banner.name %> (<%= banner.start %> → <%= banner.end %>)
-        </label>
-      </li>
-    <% }) %>
-  </ul>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uma Musume Banner Timeline</title>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+</head>
+<body class="container mt-4">
+
+  <h1 class="mb-4">Banner Timeline</h1>
+
+  <!-- Timeline Container -->
+  <div id="timeline">
+    <p>Loading banners...</p>
+  </div>
+
+  <!-- External JS for Timeline -->
+  <script src="/js/timeline.js"></script>
+</body>
+</html>

@@ -1,55 +1,68 @@
+// app/controllers/indexController.js
 const path = require('path');
 const gachaService = require('../services/gachaService');
+const { body, validationResult } = require('express-validator');
 
 // Render the main page
 const getIndexPage = (req, res) => {
-  res.render('pages/index', {timeline: timelineData}); // first load
+  res.render('pages/index'); // first load
 };
 
-// Handle calculation requests
-const calculatePlanner = (req, res) => {
-  const {
-    carats,
-    clubRank,
-    champMeeting,
-    monthlyPass,
-    dailyLogin,
-    legendRace,
-    dailyMission,
-    rainbowCleat,
-    goldCleat,
-    silverCleat
-  } = req.body;
+// Handle calculation requests with validation
+const calculatePlanner = [
+  // --- Validation rules ---
+  body('carats').isInt({ min: 0 }).toInt(),
+  body('clubRank').isIn(['SS', 'Splus', 'S', 'Aplus', 'A', 'Bplus', 'B', 'Cplus', 'C', 'Dplus']),
+  body('champMeeting').isInt({ min: 0 }).toInt(),
+  body('monthlyPass').toBoolean(),
+  body('dailyLogin').toBoolean(),
+  body('legendRace').toBoolean(),
+  body('dailyMission').toBoolean(),
+  body('rainbowCleat').toBoolean(),
+  body('goldCleat').toBoolean(),
+  body('silverCleat').toBoolean(),
 
-  const rollsAccumulated = gachaService.calculateRolls({
-    carats: Number(carats),
-    clubRank: clubRank,
-    champMeeting: Number(champMeeting),
-    monthlyPass,
-    dailyLogin,
-    legendRace,
-    dailyMission,
-    rainbowCleat,
-    goldCleat,
-    silverCleat
-  });
+  // --- Controller logic ---
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
-  // Return JSON for frontend
-  res.json({
-    rolls: rollsAccumulated, // number of rolls
-    carats: rollsAccumulated * 150 // carat value
-  });
+    const {
+      carats,
+      clubRank,
+      champMeeting,
+      monthlyPass,
+      dailyLogin,
+      legendRace,
+      dailyMission,
+      rainbowCleat,
+      goldCleat,
+      silverCleat
+    } = req.body;
 
-};
+    const rollsAccumulated = gachaService.calculateRolls({
+      carats,
+      clubRank,
+      champMeeting,
+      monthlyPass,
+      dailyLogin,
+      legendRace,
+      dailyMission,
+      rainbowCleat,
+      goldCleat,
+      silverCleat
+    });
 
-// use either Json or DB for timeline data, example below
-const timelineData = [ 
-  { name: 'Maruzensky (Summer)', start: '2025-08-01', end: '2025-08-10' },
-  { name: 'Kitasan Black (SSR)', start: '2025-08-11', end: '2025-08-20' }
+    res.json({
+      rolls: rollsAccumulated,
+      carats: rollsAccumulated * 150
+    });
+  }
 ];
 
 module.exports = {
   getIndexPage,
-  calculatePlanner,
-  timelineData
+  calculatePlanner
 };

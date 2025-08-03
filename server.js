@@ -3,6 +3,9 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const indexRoutes = require('./app/routes/index');
+const bannerRoutes = require('./app/routes/bannerRoutes');
+const { loadCache } = require('./app/cache/bannerCache');
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'app/views'));
 
@@ -16,21 +19,36 @@ app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   next();
 });
-// Logger
-app.use((req, res, next) => {
-  const timestamp = process.env.NODE_ENV === 'production' 
-    ? new Date().toISOString()
-    : new Date().toLocaleString();
-    
-  console.log(`[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
-  next();
-});
 
-// Routes
-app.use('/', indexRoutes);
+// -----------------------------
+// ASYNC SERVER BOOTSTRAP
+// -----------------------------
+(async () => {
+  try {
+    // Preload cache
+    await loadCache();
+    console.log('Banner cache preloaded successfully.');
 
-// Start server
-const { PORT, HOST } = process.env;
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on ${HOST}:${PORT}`);
-});
+    // Logger
+    app.use((req, res, next) => {
+      const timestamp = process.env.NODE_ENV === 'production'
+        ? new Date().toISOString()
+        : new Date().toLocaleString();
+      console.log(`[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
+      next();
+    });
+
+    // Routes
+    app.use('/', indexRoutes);
+    app.use('/banners', bannerRoutes);
+
+    // Start server
+    const { PORT, HOST } = process.env;
+    app.listen(PORT, HOST, () => {
+      console.log(`Server running on ${HOST}:${PORT}`);
+    });
+  } catch (err) {
+    console.error('Error preloading banner cache:', err);
+    process.exit(1); // Fail fast if cache critical
+  }
+})();
