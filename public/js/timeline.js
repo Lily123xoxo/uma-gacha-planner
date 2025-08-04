@@ -1,3 +1,11 @@
+function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 function formatLocalDate(dateString) {
   if (!dateString) return 'Unknown';
   const date = new Date(dateString);
@@ -16,45 +24,35 @@ function addDays(dateString, days) {
 }
 
 function enableDragScroll(container) {
-  let isDown = false;
+  let isDragging = false;
   let startX;
   let scrollLeft;
 
+  function onMouseMove(e) {
+    if (!isDragging) return;
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startX) * 0.8; // adjust multiplier for weight
+    container.scrollLeft = scrollLeft - walk;
+  }
+
+  function onMouseUp() {
+    isDragging = false;
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+    container.style.cursor = 'grab';
+  }
+
   container.addEventListener('mousedown', (e) => {
-    isDown = true;
-    container.classList.add('dragging');
+    isDragging = true;
     startX = e.pageX - container.offsetLeft;
     scrollLeft = container.scrollLeft;
-  });
+    container.style.cursor = 'grabbing';
 
-  ['mouseleave', 'mouseup'].forEach(evt => {
-    container.addEventListener(evt, () => {
-      isDown = false;
-      container.classList.remove('dragging');
-    });
-  });
+    // Attach global listeners
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
 
-  container.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - container.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    container.scrollLeft = scrollLeft - walk;
-  });
-
-  container.addEventListener('touchstart', (e) => {
-    isDown = true;
-    startX = e.touches[0].pageX - container.offsetLeft;
-    scrollLeft = container.scrollLeft;
-  });
-
-  container.addEventListener('touchend', () => isDown = false);
-
-  container.addEventListener('touchmove', (e) => {
-    if (!isDown) return;
-    const x = e.touches[0].pageX - container.offsetLeft;
-    const walk = (x - startX) * 1.5;
-    container.scrollLeft = scrollLeft - walk;
+    e.preventDefault(); // prevent text selection
   });
 }
 
@@ -87,15 +85,12 @@ async function loadTimeline() {
       cardWrapper.className = 'timeline-card';
 
       cardWrapper.innerHTML = `
-        <div class="card shadow-sm">
+        <div class="card shadow-sm select-banner-card" data-index="${i}" style="min-height: 15rem; max-width: 20rem;">
           <div class="card-body">
+            <p class="mb-3 date-span"><small>${startDate} → ${endDate}</small></p>
+            <hr class="my-2">
             <h6 class="mb-2 uma-name">${charBanner.uma_name}</h6>
             <h6 class="mb-2 support-name">${supportBanner.support_name}</h6>
-            <hr class="my-2">
-            <p class="mb-3 date-span"><small>${startDate} → ${endDate}</small></p>
-            <button class="btn btn-primary btn-sm select-banner-btn" data-index="${i}">
-              Select
-            </button>
           </div>
         </div>
       `;
@@ -103,23 +98,49 @@ async function loadTimeline() {
       container.appendChild(cardWrapper);
     }
 
-    // Handle selection & trigger calculation
-    container.querySelectorAll('.select-banner-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const index = parseInt(e.target.dataset.index, 10);
+    // Drag vs click detection
+    let dragStartX = 0;
+    let isDragging = false;
+    const dragThreshold = 5;
 
-        // Clear previous selection
-        container.querySelectorAll('.timeline-card .card').forEach(card =>
-          card.classList.remove('selected')
-        );
-
-        // Highlight current
-        e.target.closest('.card').classList.add('selected');
-
-        // Send calculation request
-        triggerCalculate(characters[index], supports[index]);
-      });
+    container.addEventListener('mousedown', (e) => {
+      dragStartX = e.clientX;
+      isDragging = false;
     });
+
+    container.addEventListener('mousemove', (e) => {
+      if (Math.abs(e.clientX - dragStartX) > dragThreshold) {
+        isDragging = true;
+      }
+    });
+
+    // Handle banner click
+    container.addEventListener('click', (e) => {
+  const card = e.target.closest('.select-banner-card');
+  if (card && !isDragging) {
+    const index = parseInt(card.dataset.index, 10);
+
+    // Clear previous selection and animations
+    container.querySelectorAll('.timeline-card .card').forEach(cardEl =>
+      cardEl.classList.remove('selected', 'calculating')
+    );
+
+    card.classList.add('selected', 'calculating');
+
+    // Save banner selection
+    const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
+    saved.characterBanner = characters[index];
+    saved.supportBanner = supports[index];
+    localStorage.setItem('plannerSelections', JSON.stringify(saved));
+
+    // Trigger debounced calculate (server call still happens)
+    debouncedCalculate(characters[index], supports[index]);
+  }
+});
+
+    // Emit event for index.js to restore banner highlight
+    const event = new Event('timelineLoaded');
+    window.dispatchEvent(event);
 
   } catch (err) {
     console.error('Failed to load banners:', err);
@@ -131,7 +152,7 @@ function triggerCalculate(characterBanner, supportBanner) {
   const payload = {
     carats: parseInt(document.querySelector('#carats')?.value) || 0,
     clubRank: document.querySelector('#clubRank')?.value || 'C',
-    champMeeting: parseInt(document.querySelector('#champMeeting')?.value) || 0,
+    champMeeting: parseInt(document.querySelector('#champMeeting')?.value) || 1000,
     monthlyPass: document.querySelector('#monthlyPass')?.checked || false,
     dailyLogin: document.querySelector('#dailyLogin')?.checked || false,
     legendRace: document.querySelector('#legendRace')?.checked || false,
@@ -155,10 +176,8 @@ function triggerCalculate(characterBanner, supportBanner) {
     .then(data => {
       const resultsDiv = document.querySelector('#results');
       if (data.errors) {
-        // Show validation errors
         resultsDiv.textContent = `Error: ${data.errors.map(e => e.msg).join(', ')}`;
       } else {
-        // Show calculation results
         resultsDiv.textContent = `Rolls: ${data.rolls} (${data.carats} carats) | 
           Support Tickets: ${data.supportTickets} | 
           Character Tickets: ${data.characterTickets}`;
@@ -178,13 +197,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 let searchMatches = [];
 let currentMatchIndex = -1;
 
-
-
-// Search functionality for timeline
-
 function performSearch(query) {
-  // Clear previous highlights
-  document.querySelectorAll('.timeline-card.highlight').forEach(el => el.classList.remove('highlight'));
+  // Clear previous highlights on inner cards
+  document.querySelectorAll('.timeline-card .card.highlight').forEach(el =>
+    el.classList.remove('highlight')
+  );
 
   if (!query) {
     searchMatches = [];
@@ -192,19 +209,24 @@ function performSearch(query) {
     return;
   }
 
-  // Find matches
+  // Get all timeline-card wrappers
   const cards = [...document.querySelectorAll('.timeline-card')];
+
+  // Filter matches by text content
   searchMatches = cards.filter(card =>
     card.textContent.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Highlight matches
-  searchMatches.forEach(card => card.classList.add('highlight'));
+  // Highlight inner .card of matched results
+  searchMatches.forEach(card =>
+    card.querySelector('.card').classList.add('highlight')
+  );
 
-  // Reset to first match
+  // Reset to first match and scroll
   currentMatchIndex = searchMatches.length > 0 ? 0 : -1;
   scrollToCurrentMatch();
 }
+
 
 function scrollToCurrentMatch() {
   if (currentMatchIndex === -1) return;
@@ -227,3 +249,8 @@ document.querySelector('#search-prev').addEventListener('click', () => {
   currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
   scrollToCurrentMatch();
 });
+
+// Debounced version of triggerCalculate
+const debouncedCalculate = debounce((characterBanner, supportBanner) => {
+  triggerCalculate(characterBanner, supportBanner);
+}, 400);

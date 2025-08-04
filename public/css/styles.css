@@ -1,10 +1,57 @@
-/* Timeline CSS */
+:root{
+  --primary-site-color: #fe93b1; 
+  --secondary-site-color: #5fc8b2; 
+  --tertiary-site-color: #b8a1c9;
+  --uma-text-color: #61a1e5;
+  --support-text-color: #ea8f4d;
+}
 
+body {
+  color: #eaeaea;            
+  font-family: system-ui, sans-serif;
+}
+
+/* Header CSS */
+
+.site-header {
+  background-color: #1b1b1b;  /* slightly darker than dark mode body */
+  border-bottom: 2px solid #2c2c2c; /* subtle separator bar */
+  padding: 1rem 0;
+}
+
+.site-header .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.site-title {
+  font-size: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+  font-weight: bold;
+  margin: 0;
+  letter-spacing: 1px;
+
+  background: linear-gradient(
+    to right,
+    var(--primary-site-color) 0%,
+    var(--tertiary-site-color) 12%,
+    var(--secondary-site-color) 20%   
+  );
+
+  background-size: 100%;
+  background-position: center;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Timeline CSS */
 
 .uma-name {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #61a1e5;
+  color: var(--uma-text-color);
 }
 
 .support-name {
@@ -18,12 +65,11 @@
 }
 
 .timeline-scroll {
-display: flex;
+  display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding: 1rem;
-  scrollbar-width: none;      /* Firefox */
-  -ms-overflow-style: none;   /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
   cursor: grab;
 }
 
@@ -37,7 +83,9 @@ display: flex;
 
 .timeline-card {
   min-width: 200px;
-  flex-shrink: 0;
+  width: 15vw;
+  flex-shrink: 0; 
+  padding: 0.1rem;
 }
 
 .timeline-card .card {
@@ -47,13 +95,7 @@ display: flex;
 }
 
 .timeline-card .card.selected {
-  border: 2px solid #064b9a;
-  box-shadow: 0 0 8px rgba(6, 75, 154, 0.4);
-}
-
-.timeline-card.highlight {
-  border: 2px solid yellow;
-  box-shadow: 0 0 10px yellow;
+  border: 4px solid var(--primary-site-color);
 }
 
 .timeline-card h6 {
@@ -62,4 +104,49 @@ display: flex;
 
 .timeline-card p {
   font-size: 0.85rem;
+}
+
+.select-banner-card {
+  position: relative;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.select-banner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px var(--secondary-site-color) !important;
+  border-color: var(--secondary-site-color);
+}
+
+.select-banner-card.selected.calculating::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  box-shadow: 0 0 15px 8px var(--primary-site-color);
+  border-color: var(--primary-site-color);
+  animation: fadeAura 1s ease-out 1 forwards;
+  z-index: 2;
+}
+
+@keyframes fadeAura {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.timeline-card .card.highlight {
+  outline-offset: 1px;
+  box-shadow: 0 0 15px 2px var(--primary-site-color) !important;
 }

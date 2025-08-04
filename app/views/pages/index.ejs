@@ -3,20 +3,25 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Uma Musume Gacha Planner</title>
+        <title>Uma Musume Planner</title>
         <link rel="stylesheet" href="/css/css-reset.css">
         <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="/css/styles.css">
         <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
     </head>
+
     <body class="container mt-4">
+        
+        <header>
+            <%- include('../partials/header') %>
+        </header>
+        
         <main>
-        <!-- app/views/partials/inputForm.ejs -->
-        <%- include('../partials/inputForm') %>
+            <!-- app/views/partials/inputForm.ejs -->
+            <%- include('../partials/inputForm') %>
 
-        <!-- app/views/partials/timeline.ejs -->
-         <%- include('../partials/timeline') %>
-
+            <!-- app/views/partials/timeline.ejs -->
+            <%- include('../partials/timeline') %>
         </main>
 
         <script src="/js/index.js"></script> <!-- AJAX POST script-->
