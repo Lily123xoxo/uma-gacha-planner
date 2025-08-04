@@ -1,3 +1,22 @@
+/* Timeline CSS */
+
+
+.uma-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #61a1e5;
+}
+
+.support-name {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #ea8f4d;
+}
+
+.date-span {
+  color: #ffffff;
+}
+
 .timeline-scroll {
 display: flex;
   gap: 1rem;
@@ -30,6 +49,11 @@ display: flex;
 .timeline-card .card.selected {
   border: 2px solid #064b9a;
   box-shadow: 0 0 8px rgba(6, 75, 154, 0.4);
+}
+
+.timeline-card.highlight {
+  border: 2px solid yellow;
+  box-shadow: 0 0 10px yellow;
 }
 
 .timeline-card h6 {

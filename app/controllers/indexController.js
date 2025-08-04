@@ -10,7 +10,7 @@ const getIndexPage = (req, res) => {
 // Handle calculation requests with validation
 const calculatePlanner = [
   // --- Validation rules ---
-  body('carats').isInt({ min: 0, max: 999999999 }),
+  body('carats').isInt({ min: 0, max: 9999999999999 }),
   body('clubRank').isIn(['SS', 'Splus', 'S', 'Aplus', 'A', 'Bplus', 'B', 'Cplus', 'C', 'Dplus']),
   body('champMeeting').isIn([1000, 1200, 1800, 2500]), // allow only these four values
   body('monthlyPass').toBoolean(),
@@ -44,7 +44,7 @@ const calculatePlanner = [
     } = req.body;
 
     // Existing calculation logic
-    const rollsAccumulated = gachaService.calculateRolls({
+    const result = gachaService.calculateRolls({
       carats,
       clubRank,
       champMeeting,
@@ -58,14 +58,11 @@ const calculatePlanner = [
       bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
     });
 
-    // Placeholder: Attach selected banner data to response (not used in calc yet)
     res.json({
-      rolls: rollsAccumulated,
-      carats: rollsAccumulated * 150,
-      selectedBanners: {
-        character: characterBanner || null,
-        support: supportBanner || null
-      }
+      rolls: result.rolls,
+      carats: result.carats,
+      supportTickets: result.supportTickets,
+      characterTickets: result.characterTickets,
     });
   }
 ];
