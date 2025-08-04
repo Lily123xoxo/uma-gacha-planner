@@ -11,19 +11,18 @@
         <script src="/bootstrap/js/bootstrap.bundle.min.js"></script>
     </head>
 
-    <body class="container mt-4" id="main-body">
+    <body>
 
         <header>
             <%- include('../partials/header') %>
         </header>
-        
-        <main>
-            <!-- app/views/partials/inputForm.ejs -->
-            <%- include('../partials/inputForm') %>
-
-            <!-- app/views/partials/timeline.ejs -->
-            <%- include('../partials/timeline') %>
-        </main>
+    
+        <div id="main-body">
+            <main>
+                <%- include('../partials/inputForm') %>
+                <%- include('../partials/timeline') %>
+            </main>
+        </div>  
 
         <script src="/js/index.js"></script> <!-- AJAX POST script-->
     </body>
