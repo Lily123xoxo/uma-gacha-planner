@@ -1,75 +1,86 @@
-<div class="container-fluid my-4 bg-dark text-light p-4 rounded">
-  <form id="planner-form">
-    <div class="row g-3">
-      <!-- Current Carats -->
-      <div class="col-md-4">
-        <label for="carats" class="form-label">Current Carats:</label>
-        <input type="number" min="0" name="carats" id="carats" class="form-control bg-dark text-light border-light" required>
+<!-- Full-width container -->
+<div class="container-fluid my-4">
+  <!-- Rounded bordered wrapper -->
+  <div class="form-wrapper card bg-dark text-light border-light rounded p-4">
+    <form id="planner-form">
+      <div class="row g-3">
+
+        <!-- Current Carats -->
+        <div class="col-md-4">
+          <div class="mb-3">
+            <label for="carats" class="form-label">Current Carats:</label>
+            <input type="number" min="0" class="form-control bg-dark text-light border-light" id="carats" name="carats" required>
+          </div>
+        </div>
+
+        <!-- Club Rank -->
+        <div class="col-md-4">
+          <div class="mb-3">
+            <label for="clubRank" class="form-label">Club Rank:</label>
+            <select class="form-select bg-dark text-light border-light" id="clubRank" name="clubRank" required>
+              <option value="" disabled selected>Select a value</option>
+              <option value="SS">SS</option>
+              <option value="Splus">S+</option>
+              <option value="S">S</option>
+              <option value="Aplus">A+</option>
+              <option value="A">A</option>
+              <option value="Bplus">B+</option>
+              <option value="B">B</option>
+              <option value="Cplus">C+</option>
+              <option value="C">C</option>
+              <option value="Dplus">D+</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Champion Meeting -->
+        <div class="col-md-4">
+          <div class="mb-3">
+            <label for="champMeeting" class="form-label">Expected CM Carat Gains:</label>
+            <select class="form-select bg-dark text-light border-light" id="champMeeting" name="champMeeting" required>
+              <option value="" disabled selected>Select a value</option>
+              <option value="2500">2500</option>
+              <option value="1800">1800</option>
+              <option value="1200">1200</option>
+              <option value="1000">1000</option>
+            </select>
+          </div>
+        </div>
       </div>
 
-      <!-- Club Rank -->
-      <div class="col-md-4">
-        <label for="clubRank" class="form-label">Club Rank:</label>
-        <select name="clubRank" id="clubRank" class="form-select bg-dark text-light border-light" required>
-          <option value="" disabled selected>Select a value</option>
-          <option value="SS">SS</option>
-          <option value="Splus">S+</option>
-          <option value="S">S</option>
-          <option value="Aplus">A+</option>
-          <option value="A">A</option>
-          <option value="Bplus">B+</option>
-          <option value="B">B</option>
-          <option value="Cplus">C+</option>
-          <option value="C">C</option>
-          <option value="Dplus">D+</option>
-        </select>
+      <!-- Checkboxes -->
+      <div class="mt-4">
+        <div class="form-check">
+          <input type="checkbox" name="monthlyPass" id="monthlyPass" class="form-check-input bg-dark border-light">
+          <label for="monthlyPass" class="form-check-label">I have the monthly pass</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="dailyLogin" id="dailyLogin" class="form-check-input bg-dark border-light">
+          <label for="dailyLogin" class="form-check-label">I collect daily login rewards</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="legendRace" id="legendRace" class="form-check-input bg-dark border-light">
+          <label for="legendRace" class="form-check-label">I win my legend races</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="dailyMission" id="dailyMission" class="form-check-input bg-dark border-light">
+          <label for="dailyMission" class="form-check-label">I do my daily missions</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="rainbowCleat" id="rainbowCleat" class="form-check-input bg-dark border-light">
+          <label for="rainbowCleat" class="form-check-label">I buy four rolls with Rainbow Cleats every month</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="goldCleat" id="goldCleat" class="form-check-input bg-dark border-light">
+          <label for="goldCleat" class="form-check-label">I buy four rolls with Gold Cleats every month</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="silverCleat" id="silverCleat" class="form-check-input bg-dark border-light">
+          <label for="silverCleat" class="form-check-label">I buy four rolls with Silver Cleats every month</label>
+        </div>
       </div>
-
-      <!-- Champion Meeting -->
-      <div class="col-md-4">
-        <label for="champMeeting" class="form-label">Expected CM Carat Gains:</label>
-        <select name="champMeeting" id="champMeeting" class="form-select bg-dark text-light border-light" required>
-          <option value="" disabled selected>Select a value</option>
-          <option value="2500">2500</option>
-          <option value="1800">1800</option>
-          <option value="1200">1200</option>
-          <option value="1000">1000</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Checkboxes below -->
-    <div class="mt-4">
-      <div class="form-check">
-        <input type="checkbox" name="monthlyPass" id="monthlyPass" class="form-check-input bg-dark border-light">
-        <label for="monthlyPass" class="form-check-label">I have the monthly pass</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" name="dailyLogin" id="dailyLogin" class="form-check-input bg-dark border-light">
-        <label for="dailyLogin" class="form-check-label">I collect daily login rewards</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" name="legendRace" id="legendRace" class="form-check-input bg-dark border-light">
-        <label for="legendRace" class="form-check-label">I win my legend races</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" name="dailyMission" id="dailyMission" class="form-check-input bg-dark border-light">
-        <label for="dailyMission" class="form-check-label">I do my daily missions</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" name="rainbowCleat" id="rainbowCleat" class="form-check-input bg-dark border-light">
-        <label for="rainbowCleat" class="form-check-label">I buy four rolls with Rainbow Cleats every month</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" name="goldCleat" id="goldCleat" class="form-check-input bg-dark border-light">
-        <label for="goldCleat" class="form-check-label">I buy four rolls with Gold Cleats every month</label>
-      </div>
-      <div class="form-check">
-        <input type="checkbox" name="silverCleat" id="silverCleat" class="form-check-input bg-dark border-light">
-        <label for="silverCleat" class="form-check-label">I buy four rolls with Silver Cleats every month</label>
-      </div>
-    </div>
-  </form>
+    </form>
+  </div>
 </div>
 
 <!-- Result Display -->
