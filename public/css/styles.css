@@ -27,6 +27,11 @@ display: flex;
   border: 1px solid #ddd;
 }
 
+.timeline-card .card.selected {
+  border: 2px solid #064b9a;
+  box-shadow: 0 0 8px rgba(6, 75, 154, 0.4);
+}
+
 .timeline-card h6 {
   font-weight: 600;
 }

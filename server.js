@@ -4,6 +4,7 @@ const path = require('path');
 const app = express();
 const indexRoutes = require('./app/routes/index');
 const bannerRoutes = require('./app/routes/bannerRoutes');
+const indexController = require('./app/controllers/indexController');
 const { loadCache } = require('./app/cache/bannerCache');
 
 app.set('view engine', 'ejs');
@@ -15,6 +16,7 @@ app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstra
 
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   next();
@@ -41,6 +43,7 @@ app.use((req, res, next) => {
     // Routes
     app.use('/', indexRoutes);
     app.use('/banners', bannerRoutes);
+    app.post('/calculate', indexController.calculatePlanner);
 
     // Start server
     const { PORT, HOST } = process.env;

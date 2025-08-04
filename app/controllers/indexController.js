@@ -1,19 +1,18 @@
-// app/controllers/indexController.js
 const path = require('path');
 const gachaService = require('../services/gachaService');
 const { body, validationResult } = require('express-validator');
 
 // Render the main page
 const getIndexPage = (req, res) => {
-  res.render('pages/index'); // first load
+  res.render('pages/index');
 };
 
 // Handle calculation requests with validation
 const calculatePlanner = [
   // --- Validation rules ---
-  body('carats').isInt({ min: 0 }).toInt(),
+  body('carats').isInt({ min: 0, max: 999999999 }),
   body('clubRank').isIn(['SS', 'Splus', 'S', 'Aplus', 'A', 'Bplus', 'B', 'Cplus', 'C', 'Dplus']),
-  body('champMeeting').isInt({ min: 0 }).toInt(),
+  body('champMeeting').isIn([1000, 1200, 1800, 2500]), // allow only these four values
   body('monthlyPass').toBoolean(),
   body('dailyLogin').toBoolean(),
   body('legendRace').toBoolean(),
@@ -39,9 +38,12 @@ const calculatePlanner = [
       dailyMission,
       rainbowCleat,
       goldCleat,
-      silverCleat
+      silverCleat,
+      characterBanner,
+      supportBanner
     } = req.body;
 
+    // Existing calculation logic
     const rollsAccumulated = gachaService.calculateRolls({
       carats,
       clubRank,
@@ -52,12 +54,18 @@ const calculatePlanner = [
       dailyMission,
       rainbowCleat,
       goldCleat,
-      silverCleat
+      silverCleat,
+      bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
     });
 
+    // Placeholder: Attach selected banner data to response (not used in calc yet)
     res.json({
       rolls: rollsAccumulated,
-      carats: rollsAccumulated * 150
+      carats: rollsAccumulated * 150,
+      selectedBanners: {
+        character: characterBanner || null,
+        support: supportBanner || null
+      }
     });
   }
 ];

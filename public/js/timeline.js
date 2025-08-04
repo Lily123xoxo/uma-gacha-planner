@@ -20,7 +20,6 @@ function enableDragScroll(container) {
   let startX;
   let scrollLeft;
 
-  // Mouse down
   container.addEventListener('mousedown', (e) => {
     isDown = true;
     container.classList.add('dragging');
@@ -28,7 +27,6 @@ function enableDragScroll(container) {
     scrollLeft = container.scrollLeft;
   });
 
-  // Mouse leave/up
   ['mouseleave', 'mouseup'].forEach(evt => {
     container.addEventListener(evt, () => {
       isDown = false;
@@ -36,16 +34,14 @@ function enableDragScroll(container) {
     });
   });
 
-  // Mouse move
   container.addEventListener('mousemove', (e) => {
     if (!isDown) return;
     e.preventDefault();
     const x = e.pageX - container.offsetLeft;
-    const walk = (x - startX) * 1.5; // Adjust speed
+    const walk = (x - startX) * 1.5;
     container.scrollLeft = scrollLeft - walk;
   });
 
-  // Touch events for mobile
   container.addEventListener('touchstart', (e) => {
     isDown = true;
     startX = e.touches[0].pageX - container.offsetLeft;
@@ -64,7 +60,6 @@ function enableDragScroll(container) {
 
 async function loadTimeline() {
   try {
-    // Fetch both character and support banners
     const [charRes, supportRes] = await Promise.all([
       fetch(`/banners/api/character-banners`),
       fetch(`/banners/api/support-banners`)
@@ -74,24 +69,19 @@ async function loadTimeline() {
     const supports = await supportRes.json();
 
     const container = document.querySelector('.timeline-scroll');
-    container.innerHTML = ''; // reset container
+    container.innerHTML = '';
 
     for (let i = 0; i < characters.length; i++) {
       const charBanner = characters[i];
       const supportBanner = supports[i];
 
-      // Pick correct global start date
       const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
-      
-      // Calculate end date = start + 11 days
       const endDateObj = addDays(startDateRaw, 11);
 
       const startDate = formatLocalDate(startDateRaw);
-      const endDate = endDateObj ? endDateObj.toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      }) : 'Unknown';
+      const endDate = endDateObj
+        ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+        : 'Unknown';
 
       const cardWrapper = document.createElement('div');
       cardWrapper.className = 'timeline-card';
@@ -102,16 +92,79 @@ async function loadTimeline() {
             <h6 class="mb-2">${charBanner.uma_name}</h6>
             <p class="mb-1 text-muted small">${supportBanner.support_name}</p>
             <hr class="my-2">
-            <p class="mb-0"><small>${startDate} → ${endDate}</small></p>
+            <p class="mb-3"><small>${startDate} → ${endDate}</small></p>
+            <button class="btn btn-primary btn-sm select-banner-btn" data-index="${i}">
+              Select
+            </button>
           </div>
         </div>
       `;
 
       container.appendChild(cardWrapper);
     }
+
+    // Handle selection & trigger calculation
+    container.querySelectorAll('.select-banner-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.target.dataset.index, 10);
+
+        // Clear previous selection
+        container.querySelectorAll('.timeline-card .card').forEach(card =>
+          card.classList.remove('selected')
+        );
+
+        // Highlight current
+        e.target.closest('.card').classList.add('selected');
+
+        // Send calculation request
+        triggerCalculate(characters[index], supports[index]);
+      });
+    });
+
   } catch (err) {
     console.error('Failed to load banners:', err);
   }
+}
+
+function triggerCalculate(characterBanner, supportBanner) {
+  // Gather form data with safe defaults
+  const payload = {
+    carats: parseInt(document.querySelector('#carats')?.value) || 0,
+    clubRank: document.querySelector('#clubRank')?.value || 'C',
+    champMeeting: parseInt(document.querySelector('#champMeeting')?.value) || 0,
+    monthlyPass: document.querySelector('#monthlyPass')?.checked || false,
+    dailyLogin: document.querySelector('#dailyLogin')?.checked || false,
+    legendRace: document.querySelector('#legendRace')?.checked || false,
+    dailyMission: document.querySelector('#dailyMission')?.checked || false,
+    rainbowCleat: document.querySelector('#rainbowCleat')?.checked || false,
+    goldCleat: document.querySelector('#goldCleat')?.checked || false,
+    silverCleat: document.querySelector('#silverCleat')?.checked || false,
+
+    // Banner selection
+    characterBanner,
+    supportBanner
+  };
+
+  // Call API
+  fetch('/calculate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+    .then(res => res.json())
+    .then(data => {
+      const resultsDiv = document.querySelector('#results');
+      if (data.errors) {
+        // Show validation errors
+        resultsDiv.textContent = `Error: ${data.errors.map(e => e.msg).join(', ')}`;
+      } else {
+        // Show calculation results
+        resultsDiv.textContent = `Rolls: ${data.rolls} (${data.carats} carats)`;
+      }
+    })
+    .catch(err => {
+      document.querySelector('#results').textContent = `Calculation failed: ${err.message}`;
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
