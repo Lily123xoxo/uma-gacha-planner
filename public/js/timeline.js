@@ -69,6 +69,13 @@ async function loadTimeline() {
     const container = document.querySelector('.timeline-scroll');
     container.innerHTML = '';
 
+    // Gracefully handle mismatched card sizes
+    if (characters.length !== supports.length) {
+      console.warn(
+        `Warning: Mismatched data — characters (${characters.length}) vs support cards (${supportCards.length}). Truncating to ${length}.`
+      );
+    }
+    
     for (let i = 0; i < characters.length; i++) {
       const charBanner = characters[i];
       const supportBanner = supports[i];
@@ -133,12 +140,10 @@ async function loadTimeline() {
     saved.supportBanner = supports[index];
     localStorage.setItem('plannerSelections', JSON.stringify(saved));
 
-    // Trigger debounced calculate (server call still happens)
     debouncedCalculate(characters[index], supports[index]);
   }
 });
 
-    // Emit event for index.js to restore banner highlight
     const event = new Event('timelineLoaded');
     window.dispatchEvent(event);
 
@@ -148,7 +153,6 @@ async function loadTimeline() {
 }
 
 function triggerCalculate(characterBanner, supportBanner) {
-  // Gather form data with safe defaults
   const payload = {
     carats: parseInt(document.querySelector('#carats')?.value) || 0,
     clubRank: document.querySelector('#clubRank')?.value || 'C',
@@ -160,13 +164,10 @@ function triggerCalculate(characterBanner, supportBanner) {
     rainbowCleat: document.querySelector('#rainbowCleat')?.checked || false,
     goldCleat: document.querySelector('#goldCleat')?.checked || false,
     silverCleat: document.querySelector('#silverCleat')?.checked || false,
-
-    // Banner selection
     characterBanner,
     supportBanner
   };
 
-  // Call API
   fetch('/calculate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -209,24 +210,18 @@ function performSearch(query) {
     return;
   }
 
-  // Get all timeline-card wrappers
   const cards = [...document.querySelectorAll('.timeline-card')];
-
-  // Filter matches by text content
   searchMatches = cards.filter(card =>
     card.textContent.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Highlight inner .card of matched results
   searchMatches.forEach(card =>
     card.querySelector('.card').classList.add('highlight')
   );
 
-  // Reset to first match and scroll
   currentMatchIndex = searchMatches.length > 0 ? 0 : -1;
   scrollToCurrentMatch();
 }
-
 
 function scrollToCurrentMatch() {
   if (currentMatchIndex === -1) return;
@@ -250,7 +245,7 @@ document.querySelector('#search-prev').addEventListener('click', () => {
   scrollToCurrentMatch();
 });
 
-// Debounced version of triggerCalculate
+// Debounced wrapper for triggerCalculate()
 const debouncedCalculate = debounce((characterBanner, supportBanner) => {
   triggerCalculate(characterBanner, supportBanner);
 }, 400);

@@ -24,12 +24,19 @@
   --font-size-xxx-large: 1.7rem;
 }
 
+/*
+* TODO:
+*      - REMOVE ALL !IMPORTANT TAGS
+*      - slight padding on everything
+*/
+
+
 body {
   color: var(--white-text-color);          
   font-family: system-ui, sans-serif;
 }
 
-#main-body {
+#main-body, .header-inner {
   max-width: 1440px;
   margin: 0 auto;
   padding-left: 1rem;
@@ -42,8 +49,7 @@ body {
   margin: 0 auto;
   background-color: #1b1b1b;  /* slightly darker than dark mode body */
   border-bottom: 2px solid #2c2c2c; /* subtle separator bar */
-  padding: 1rem 0;
-  padding-left: 6rem;           
+  padding: 1rem 0;       
 }
 
 .site-header .container {
@@ -72,7 +78,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-h2 {
+.banner-title {
   font-weight: bold;
   background: linear-gradient(
     to right,
@@ -119,7 +125,7 @@ h2 {
 }
 
 .date-span {
-  color: #ffffff;
+  color: var(--white-text-color);
 }
 
 .timeline-scroll {
@@ -163,7 +169,7 @@ h2 {
 
 .timeline-card .card.highlight {
   outline-offset: 1px;
-  box-shadow: 0 0 15px 2px var(--primary-site-color) !important;
+  box-shadow: 0 0 15px 2px var(--tertiary-site-color) !important;
 }
 
 .timeline-card h6 {

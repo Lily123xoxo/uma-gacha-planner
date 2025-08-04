@@ -1,5 +1,7 @@
-
-// map club ranks to numeric values
+/**
+ * Maps club ranks to their respective carat values.
+ * Used to calculate carats earned based on the player's club rank.
+**/
 const clubRankMap = {
   SS: 3000,
   Splus: 2400,
@@ -13,66 +15,115 @@ const clubRankMap = {
   Dplus: 150
 };
 
-function calculateRolls(options) {
-  
-  const bannerStartDate = options.bannerStartDate;
-  const clubCarats = clubRankMap[options.clubRank] || 0; // default to 0 if not found
-  const champCarats = options.champMeeting || 0;
-  const currentCarats = options.carats || 0;
-  let  supportTickets = 0;
+const CARATS_PER_ROLL = 150;
+const WEEKLY_LOGIN_CARATS = 110;
+const MONTHLY_PASS_DAILY_CARATS = 50;
+const MONTHLY_PASS_IMMEDIATE_CARATS = 500;
+const DAILY_MISSION_CARATS = 30;
+const LEGEND_RACE_MONTHLY_CARATS = 1000;
+
+/**
+ * Calculates additional carats from monthly rewards.
+ */
+function calculateMonthlyCarats(options, months) {
+  let carats = 0;
+  let supportTickets = 0;
   let characterTickets = 0;
 
-  let totalCarats = currentCarats;
+  for (let i = 0; i < months; i++) {
+    carats += clubRankMap[options.clubRank] || 0;
+    carats += options.champMeeting || 0;         
+    if (options.monthlyPass) carats += MONTHLY_PASS_IMMEDIATE_CARATS;
+    if (options.legendRace) carats += LEGEND_RACE_MONTHLY_CARATS;
 
-  if (bannerStartDate) {
-      const now = new Date();
-      const start = new Date(bannerStartDate);
+    if (options.rainbowCleat) {
+      supportTickets += 2;
+      characterTickets += 2;
+    }
+    if (options.goldCleat) {
+      supportTickets += 2;
+      characterTickets += 2;
+    }
+    if (options.silverCleat) {
+      supportTickets += 2;
+      characterTickets += 2;
+    }
+  }
 
-      // Difference in days
-      const diffTime = start - now; // milliseconds
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      const months = Math.floor(diffDays / 30);
-      const weeks = Math.floor(diffDays / 7);
+  return { carats, supportTickets, characterTickets };
+}
 
-      // If the banner has already started, calculate from today
-      if (diffDays <= 0) {
-        return {
-          rolls: Math.floor(totalCarats / 150),
-          carats: totalCarats,
-          supportTickets,
-          characterTickets
-        };
-      }
 
-      // Monthly accumulation
-      for (let i = 0; i < months; i++) {
-        totalCarats += clubCarats; // add club rank carats
-        totalCarats += champCarats; // add champion meeting carats
-        if (options.monthlyPass) totalCarats += 500; // 500 carats per month when pass is purchased
-        if (options.legendRace) totalCarats += 1000 // 250 per race, assumes 4 new races per month
-        if (options.rainbowCleat) {supportTickets +=2; characterTickets +=2;} // 2 tickets per month
-        if (options.goldCleat) {supportTickets +=2; characterTickets +=2;} // 2 tickets per month
-        if (options.silverCleat) {supportTickets +=2; characterTickets +=2;} // 2 tickets per month
-      }
 
-      // Weekly accumulation
-      for (let i = 0; i < weeks; i++) {
-        totalCarats += 110; // 110 carats per week from login bonuses
-      }
+/**
+ * Calculates additional carats from weekly rewards.
+ */
+function calculateWeeklyCarats(weeks) {
+  return weeks * WEEKLY_LOGIN_CARATS;
+}
 
-      // Daily accumulation
-      for (let i = 0; i < diffDays; i++) {
-          if (options.monthlyPass) totalCarats += 50 // per day
-          if (options.dailyMission) totalCarats += 30 // per day
-      }
+/**
+ * Calculates additional carats from daily rewards.
+ */
+function calculateDailyCarats(options, days) {
+  let carats = 0;
+  for (let i = 0; i < days; i++) {
+    if (options.monthlyPass) carats += MONTHLY_PASS_DAILY_CARATS;
+    if (options.dailyMission) carats += DAILY_MISSION_CARATS;
+  }
+  return carats;
+}
 
+/**
+ * Main function to calculate rolls and carats available.
+ */
+function calculateRolls(options) {
+  const bannerStartDate = options.bannerStartDate;
+  let totalCarats = options.carats || 0;
+  let supportTickets = 0;
+  let characterTickets = 0;
+
+  if (!bannerStartDate) {
+    return { rolls: 0, carats: totalCarats, supportTickets, characterTickets };
+  }
+
+  const now = new Date();
+  const start = new Date(bannerStartDate);
+
+  // Difference in days
+  const diffTime = start - now; // milliseconds
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const months = Math.floor(diffDays / 30);
+  const weeks = Math.floor(diffDays / 7);
+
+  // If banner already started
+  if (diffDays <= 0) {
     return {
-        rolls: Math.floor(totalCarats / 150),
-        carats: totalCarats,
-        supportTickets,
-        characterTickets
+      rolls: Math.floor(totalCarats / CARATS_PER_ROLL),
+      carats: totalCarats,
+      supportTickets,
+      characterTickets
     };
   }
+
+  // Monthly accumulation
+  const monthly = calculateMonthlyCarats(options, months);
+  totalCarats += monthly.carats;
+  supportTickets += monthly.supportTickets;
+  characterTickets += monthly.characterTickets;
+
+  // Weekly accumulation
+  totalCarats += calculateWeeklyCarats(weeks);
+
+  // Daily accumulation
+  totalCarats += calculateDailyCarats(options, diffDays);
+
+  return {
+    rolls: Math.floor(totalCarats / CARATS_PER_ROLL),
+    carats: totalCarats,
+    supportTickets,
+    characterTickets
+  };
 }
 
 module.exports = { calculateRolls };

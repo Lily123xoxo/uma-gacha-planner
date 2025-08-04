@@ -6,9 +6,7 @@ const getIndexPage = (req, res) => {
   res.render('pages/index');
 };
 
-const calculatePlanner = [
-
-  // --- Validation rules ---
+const validationRules = [
   body('carats').isInt({ min: 0, max: 9999999999999 }),
   body('clubRank').isIn(['SS', 'Splus', 'S', 'Aplus', 'A', 'Bplus', 'B', 'Cplus', 'C', 'Dplus']),
   body('champMeeting').isIn([1000, 1200, 1800, 2500]),
@@ -19,48 +17,48 @@ const calculatePlanner = [
   body('rainbowCleat').toBoolean(),
   body('goldCleat').toBoolean(),
   body('silverCleat').toBoolean(),
+];
 
+const handleValidationErrors = (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return true;
+  }
+  return false;
+};
+
+const extractRequestData = (req) => {
+  const {
+    carats, clubRank, champMeeting, monthlyPass, dailyLogin,
+    legendRace, dailyMission, rainbowCleat, goldCleat, silverCleat,
+    characterBanner, supportBanner
+  } = req.body;
+
+  return {
+    carats, clubRank, champMeeting, monthlyPass, dailyLogin,
+    legendRace, dailyMission, rainbowCleat, goldCleat, silverCleat,
+    bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
+  };
+};
+
+const formatResponse = (result) => ({
+  rolls: result.rolls,
+  carats: result.carats,
+  supportTickets: result.supportTickets,
+  characterTickets: result.characterTickets,
+});
+
+
+const calculatePlanner = [
+  ...validationRules,
   (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    if (handleValidationErrors(req, res)) return;
 
-    const {
-      carats,
-      clubRank,
-      champMeeting,
-      monthlyPass,
-      dailyLogin,
-      legendRace,
-      dailyMission,
-      rainbowCleat,
-      goldCleat,
-      silverCleat,
-      characterBanner,
-      supportBanner
-    } = req.body;
-
-    const result = gachaService.calculateRolls({
-      carats,
-      clubRank,
-      champMeeting,
-      monthlyPass,
-      dailyLogin,
-      legendRace,
-      dailyMission,
-      rainbowCleat,
-      goldCleat,
-      silverCleat,
-      bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
-    });
-
-    res.json({
-      rolls: result.rolls,
-      carats: result.carats,
-      supportTickets: result.supportTickets,
-      characterTickets: result.characterTickets,
-    });
+    const requestData = extractRequestData(req);
+    const result = gachaService.calculateRolls(requestData);
+    
+    res.json(formatResponse(result));
   }
 ];
 
