@@ -92,7 +92,7 @@ async function loadTimeline() {
       cardWrapper.className = 'timeline-card';
 
       cardWrapper.innerHTML = `
-        <div class="card shadow-sm select-banner-card" data-index="${i}" style="min-height: 15rem; max-width: 20rem;">
+        <div class="card select-banner-card" data-index="${i}">
           <div class="card-body">
             <p class="mb-3 date-span"><small>${startDate} → ${endDate}</small></p>
             <hr class="my-2">

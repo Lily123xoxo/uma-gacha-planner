@@ -1,9 +1,11 @@
 <!-- Row containing title and search -->
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2 class="banner-title">Banner Timeline</h2>
+<div class="d-flex justify-content-between align-items-center banner-search">
+  <div class="banner-title-wrapper">
+    <h2 class="banner-title">Banner Timeline</h2>
+  </div>
 
   <!-- Search Bar -->
-  <div class="input-group" style="width: 400px;">
+  <div class="input-group search-bar">
     <input
       type="text" 
       id="timeline-search" 
@@ -20,16 +22,19 @@
   </div>
 </div>
 
-<!-- Timeline container -->
-<div class="timeline-wrapper">
-  <div class="timeline-scroll d-flex overflow-auto py-3 position-relative">
-    <!-- JS will inject content here -->
+<div class="timeline-wrapper"> <!-- scrolling container -->
+  <div class="timeline-inner"> <!-- allows overflow visuals -->
+    <div class="timeline-scroll">
+      <!-- Cards injected here -->
+    </div>
   </div>
 </div>
 
 <!-- Results output -->
-<div id="results" class="mt-4">
-  <p class="text-muted">Select a banner to calculate rolls.</p>
+<div class = "results-wrapper">
+  <div id="results" class="mt-4">
+    <p class="text-muted">Select a banner to calculate rolls.</p>
+  </div>
 </div>
 
 <!-- Timeline JS -->
