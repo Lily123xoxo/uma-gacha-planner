@@ -15,6 +15,19 @@ const clubRankMap = {
   Dplus: 150
 };
 
+/**
+ * Maps team trials ranks to their respective carat values.
+ * Used to calculate carats earned based on the player's team trials class.
+**/
+const teamTrialsRankMap = {
+  Class6: 250,
+  Class5: 150,
+  Class4: 100,
+  Class3: 50,
+  Class2: 25,
+  Class1: 0
+};
+
 const CARATS_PER_ROLL = 150;
 const WEEKLY_LOGIN_CARATS = 110;
 const MONTHLY_PASS_DAILY_CARATS = 50;
@@ -58,8 +71,9 @@ function calculateMonthlyCarats(options, months) {
 /**
  * Calculates additional carats from weekly rewards.
  */
-function calculateWeeklyCarats(weeks) {
-  return weeks * WEEKLY_LOGIN_CARATS;
+function calculateWeeklyCarats(options, weeks) {
+  carats = (WEEKLY_LOGIN_CARATS * weeks) + (teamTrialsRankMap[options.teamTrialsRank] || 0)
+  return carats;
 }
 
 /**
@@ -113,7 +127,7 @@ function calculateRolls(options) {
   characterTickets += monthly.characterTickets;
 
   // Weekly accumulation
-  totalCarats += calculateWeeklyCarats(weeks);
+  totalCarats += calculateWeeklyCarats(options, weeks);
 
   // Daily accumulation
   totalCarats += calculateDailyCarats(options, diffDays);

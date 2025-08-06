@@ -8,6 +8,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('carats').value = data.carats || '';
     document.getElementById('clubRank').value = data.clubRank || '';
+    document.getElementById('teamTrialsRank').value = data.teamTrialsRank || '';
     document.getElementById('champMeeting').value = data.champMeeting || '';
     document.getElementById('monthlyPass').checked = data.monthlyPass || false;
     document.getElementById('dailyLogin').checked = data.dailyLogin || false;
@@ -42,6 +43,7 @@ function getPlannerSelections() {
   return {
     carats: Number(document.getElementById('carats').value),
     clubRank: document.getElementById('clubRank').value,
+    teamTrialsRank: document.getElementById('teamTrialsRank').value,
     champMeeting: Number(document.getElementById('champMeeting').value),
     monthlyPass: document.getElementById('monthlyPass').checked,
     dailyLogin: document.getElementById('dailyLogin').checked,

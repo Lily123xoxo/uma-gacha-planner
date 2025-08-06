@@ -108,7 +108,7 @@ async function loadTimeline() {
     // Drag vs click detection
     let dragStartX = 0;
     let isDragging = false;
-    const dragThreshold = 5;
+    const dragThreshold = 15;
 
     container.addEventListener('mousedown', (e) => {
       dragStartX = e.clientX;
@@ -156,6 +156,7 @@ function triggerCalculate(characterBanner, supportBanner) {
   const payload = {
     carats: parseInt(document.querySelector('#carats')?.value) || 0,
     clubRank: document.querySelector('#clubRank')?.value || 'C',
+    teamTrialsRank: document.querySelector('#teamTrialsRank')?.value || 'Class3',
     champMeeting: parseInt(document.querySelector('#champMeeting')?.value) || 1000,
     monthlyPass: document.querySelector('#monthlyPass')?.checked || false,
     dailyLogin: document.querySelector('#dailyLogin')?.checked || false,
@@ -167,6 +168,21 @@ function triggerCalculate(characterBanner, supportBanner) {
     characterBanner,
     supportBanner
   };
+
+  const wrapper = document.querySelector('.results-wrapper');
+  if (!wrapper) return;
+
+  // Reset previous animation
+  wrapper.classList.remove('processing');
+  void wrapper.offsetWidth; // force reflow
+
+  // Start shimmer animation
+  wrapper.classList.add('processing');
+
+  // Remove shimmer class after animation completes
+  wrapper.addEventListener('animationend', () => {
+    wrapper.classList.remove('processing');
+  }, { once: true });
 
   fetch('/calculate', {
     method: 'POST',
@@ -186,8 +202,9 @@ function triggerCalculate(characterBanner, supportBanner) {
     })
     .catch(err => {
       document.querySelector('#results').textContent = `Calculation failed: ${err.message}`;
-    });
+    })
 }
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadTimeline();

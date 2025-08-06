@@ -9,6 +9,7 @@ const getIndexPage = (req, res) => {
 const validationRules = [
   body('carats').isInt({ min: 0, max: 9999999999999 }),
   body('clubRank').isIn(['SS', 'Splus', 'S', 'Aplus', 'A', 'Bplus', 'B', 'Cplus', 'C', 'Dplus']),
+  body('teamTrialsRank').isIn(['Class6', 'Class5', 'Class4', 'Class3', 'Class2', 'Class1']),
   body('champMeeting').isIn([1000, 1200, 1800, 2500]),
   body('monthlyPass').toBoolean(),
   body('dailyLogin').toBoolean(),
@@ -30,13 +31,13 @@ const handleValidationErrors = (req, res) => {
 
 const extractRequestData = (req) => {
   const {
-    carats, clubRank, champMeeting, monthlyPass, dailyLogin,
+    carats, clubRank, teamTrialsRank, champMeeting, monthlyPass, dailyLogin,
     legendRace, dailyMission, rainbowCleat, goldCleat, silverCleat,
     characterBanner, supportBanner
   } = req.body;
 
   return {
-    carats, clubRank, champMeeting, monthlyPass, dailyLogin,
+    carats, clubRank, teamTrialsRank, champMeeting, monthlyPass, dailyLogin,
     legendRace, dailyMission, rainbowCleat, goldCleat, silverCleat,
     bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
   };
