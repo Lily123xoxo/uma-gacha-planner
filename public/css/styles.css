@@ -174,8 +174,9 @@ body {
   color: var(--support-text-color);
 }
 
-.date-span {
+.timeline-card .date-span {
   color: var(--white-text-color);
+  font-size: 1rem;
 }
 
 .search-bar {
@@ -324,6 +325,11 @@ body {
     font-size: 1.85rem;
   }
 
+  .timeline-card img {
+    max-width: 100%;       
+    object-fit: contain;
+    margin: 0 auto;       
+  }
 }
 
 @media (min-width: 576px) and (max-width: 767.98px) {
@@ -461,9 +467,9 @@ body {
   }
   
   #main-body, .header-inner {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }

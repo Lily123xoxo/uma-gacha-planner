@@ -91,16 +91,36 @@ async function loadTimeline() {
       const cardWrapper = document.createElement('div');
       cardWrapper.className = 'timeline-card';
 
-      cardWrapper.innerHTML = `
-        <div class="card select-banner-card" data-index="${i}">
-          <div class="card-body">
-            <p class="mb-3 date-span"><small>${startDate} → ${endDate}</small></p>
-            <hr class="my-2">
-            <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
-            <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
-          </div>
-        </div>
-      `;
+      const charImageUrl = charBanner.image_path;
+const supportImageUrl = supportBanner.image_path;
+
+cardWrapper.innerHTML = `
+  <div class="card select-banner-card" data-index="${i}">
+    <div class="card-body">
+      <p class="mb-2 date-span">${startDate} → ${endDate}</p>
+      <hr class="my-2">
+
+      <!-- Character Banner -->
+      <div class="banner-section">
+        <img src="${charImageUrl}" 
+             alt="${charBanner.uma_name}" 
+             class="banner-img"
+             onerror="this.onerror=null;this.src='/images/default.png';">
+        <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
+      </div>
+
+      <!-- Support Banner -->
+      <div class="banner-section">
+        <img src="${supportImageUrl}" 
+             alt="${supportBanner.support_name}" 
+             class="banner-img"
+             onerror="this.onerror=null;this.src='/images/default.png';">
+        <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
+      </div>
+    </div>
+  </div>
+`;
+
 
       container.appendChild(cardWrapper);
     }
@@ -181,7 +201,7 @@ function triggerCalculate(characterBanner, supportBanner) {
         resultsDiv.textContent = `Error: ${data.errors.map(e => e.msg).join(', ')}`;
       } else {
         resultsDiv.innerHTML = `
-        <div class="result-column">Rolls: ${data.rolls} (${data.carats} carats)</div>
+        <div class="result-column">Rolls: ${data.rolls}</div>
         <div class="result-column">Support Tickets: ${data.supportTickets}</div>
         <div class="result-column">Character Tickets: ${data.characterTickets}</div>
       `;
