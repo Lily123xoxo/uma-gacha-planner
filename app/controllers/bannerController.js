@@ -1,4 +1,6 @@
 const bannerDAO = require('../dao/bannerDao');
+const path = require('path');
+const fs = require('fs/promises');
 
 async function getCharacterBanners(req, res) {
   try {

@@ -96,8 +96,8 @@ async function loadTimeline() {
           <div class="card-body">
             <p class="mb-3 date-span"><small>${startDate} → ${endDate}</small></p>
             <hr class="my-2">
-            <h6 class="mb-2 uma-name">${charBanner.uma_name}</h6>
-            <h6 class="mb-2 support-name">${supportBanner.support_name}</h6>
+            <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
+            <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
           </div>
         </div>
       `;
@@ -169,21 +169,6 @@ function triggerCalculate(characterBanner, supportBanner) {
     supportBanner
   };
 
-  const wrapper = document.querySelector('.results-wrapper');
-  if (!wrapper) return;
-
-  // Reset previous animation
-  wrapper.classList.remove('processing');
-  void wrapper.offsetWidth; // force reflow
-
-  // Start shimmer animation
-  wrapper.classList.add('processing');
-
-  // Remove shimmer class after animation completes
-  wrapper.addEventListener('animationend', () => {
-    wrapper.classList.remove('processing');
-  }, { once: true });
-
   fetch('/calculate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -195,16 +180,17 @@ function triggerCalculate(characterBanner, supportBanner) {
       if (data.errors) {
         resultsDiv.textContent = `Error: ${data.errors.map(e => e.msg).join(', ')}`;
       } else {
-        resultsDiv.textContent = `Rolls: ${data.rolls} (${data.carats} carats) | 
-          Support Tickets: ${data.supportTickets} | 
-          Character Tickets: ${data.characterTickets}`;
+        resultsDiv.innerHTML = `
+        <div class="result-column">Rolls: ${data.rolls} (${data.carats} carats)</div>
+        <div class="result-column">Support Tickets: ${data.supportTickets}</div>
+        <div class="result-column">Character Tickets: ${data.characterTickets}</div>
+      `;
       }
     })
     .catch(err => {
       document.querySelector('#results').textContent = `Calculation failed: ${err.message}`;
-    })
+    });
 }
-
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadTimeline();
