@@ -4,55 +4,82 @@ const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const app = express();
-const indexRoutes = require('./app/routes/index');
+
+// Controllers and routes
 const bannerRoutes = require('./app/routes/bannerRoutes');
 const indexController = require('./app/controllers/indexController');
 const { loadCache } = require('./app/cache/bannerCache');
 
-//Rate limiter
+// View engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'app/views'));
+
+// Enable template caching in prod
+if (app.get('env') === 'production') {
+  app.enable('view cache');
+}
+
+// Security Headers (Helmet)
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "default-src": ["'self'"],
+      "script-src": ["'self'"],
+      "script-src-attr": ["'none'"],
+      // Allow Bootstrap/JSDelivr CSS; keep inline styles off (remove 'unsafe-inline' if you don't use any)
+      "style-src": ["'self'", "https:"],
+      // Fonts from self or CDNs; add data: if needed by icon fonts
+      "font-src": ["'self'", "https:", "data:"],
+      // Your current needs for images
+      "img-src": ["'self'", "data:"],
+      // Fetch/XHR
+      "connect-src": ["'self'"],
+      // Lock these down
+      "object-src": ["'none'"],
+      "base-uri": ["'self'"],
+      "frame-ancestors": ["'none'"],
+      // "upgrade-insecure-requests": [] // optional if you want strict HTTPS
+    },
+  },
+  referrerPolicy: { policy: "no-referrer" },
+  crossOriginEmbedderPolicy: true,
+  crossOriginOpenerPolicy: true,
+  crossOriginResourcePolicy: { policy: "same-origin" },
+}));
+app.disable('x-powered-by');
+
+// If behind a proxy/load balancer, uncomment:
+// app.set('trust proxy', 1);
+
+//Rate limiter (global)
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
   standardHeaders: true,
   legacyHeaders: false,
 });
+app.use(globalLimiter);
 
-//render limiter
-const renderLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-});
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'app/views'));
-
-// Serve files
+// Static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
-app.use(globalLimiter);
 
-// If behind a proxy/load balancer, uncomment:
-// app.set('trust proxy', 1);
-
-// Middleware
-app.use(helmet());
-app.use(helmet({
-  contentSecurityPolicy: {
-    useDefaults: true,
-    directives: {
-      "script-src-attr": ["'none'"],
-      "script-src": ["'self'"],
-      "img-src": ["'self'", "data:"],       
-    },
-  },
-}));
-app.disable('x-powered-by');
+// Body parsing + locals
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
   res.locals.currentPath = req.path;
   next();
+});
+
+// Per-route limiter for index render
+const renderLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // -----------------------------
