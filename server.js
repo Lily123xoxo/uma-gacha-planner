@@ -2,11 +2,26 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const app = express();
 const indexRoutes = require('./app/routes/index');
 const bannerRoutes = require('./app/routes/bannerRoutes');
 const indexController = require('./app/controllers/indexController');
 const { loadCache } = require('./app/cache/bannerCache');
+
+//Rate limiter
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+//render limiter
+const renderLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+});
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'app/views'));
@@ -15,6 +30,10 @@ app.set('views', path.join(__dirname, 'app/views'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use(globalLimiter);
+
+// If behind a proxy/load balancer, uncomment:
+// app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet());
@@ -55,7 +74,7 @@ app.use((req, res, next) => {
     });
 
     // Routes
-    app.use('/', indexRoutes);
+    app.get('/', renderLimiter, indexController.getIndexPage);
     app.use('/banners', bannerRoutes);
     app.post('/calculate', indexController.calculatePlanner);
 
