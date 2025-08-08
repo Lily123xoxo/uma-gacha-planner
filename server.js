@@ -3,12 +3,16 @@ const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+
 const app = express();
 
-// Controllers and routes
+// Controllers & routes
 const bannerRoutes = require('./app/routes/bannerRoutes');
 const indexController = require('./app/controllers/indexController');
 const { loadCache } = require('./app/cache/bannerCache');
+
+// If behind a proxy/load balancer (Heroku/Render/Nginx/Cloudflare), uncomment:
+// app.set('trust proxy', 1);
 
 // View engine
 app.set('view engine', 'ejs');
@@ -19,7 +23,7 @@ if (app.get('env') === 'production') {
   app.enable('view cache');
 }
 
-// Security Headers (Helmet)
+// Security headers
 app.use(helmet({
   contentSecurityPolicy: {
     useDefaults: true,
@@ -27,19 +31,16 @@ app.use(helmet({
       "default-src": ["'self'"],
       "script-src": ["'self'"],
       "script-src-attr": ["'none'"],
-      // Allow Bootstrap/JSDelivr CSS; keep inline styles off (remove 'unsafe-inline' if you don't use any)
-      "style-src": ["'self'", "https:"],
-      // Fonts from self or CDNs; add data: if needed by icon fonts
-      "font-src": ["'self'", "https:", "data:"],
-      // Your current needs for images
+      "style-src": ["'self'"],
+      "font-src": ["'self'", "data:"],
       "img-src": ["'self'", "data:"],
-      // Fetch/XHR
       "connect-src": ["'self'"],
-      // Lock these down
+      // Explicit no-fallback directives
+      "frame-ancestors": ["'none'"],
+      "form-action": ["'self'"],
       "object-src": ["'none'"],
       "base-uri": ["'self'"],
-      "frame-ancestors": ["'none'"],
-      // "upgrade-insecure-requests": [] // optional if you want strict HTTPS
+      // "upgrade-insecure-requests": [] // enable in HTTPS-only prod if we desire
     },
   },
   referrerPolicy: { policy: "no-referrer" },
@@ -47,14 +48,23 @@ app.use(helmet({
   crossOriginOpenerPolicy: true,
   crossOriginResourcePolicy: { policy: "same-origin" },
 }));
+app.use(helmet.noSniff());
+
+// HSTS only in production (and only when serving over HTTPS)
+if (app.get('env') === 'production') {
+  app.use(helmet.hsts({
+    maxAge: 15552000, // 180 days
+    includeSubDomains: true,
+    preload: false
+  }));
+}
+
+// Hide Express
 app.disable('x-powered-by');
 
-// If behind a proxy/load balancer, uncomment:
-// app.set('trust proxy', 1);
-
-//Rate limiter (global)
+// --- Global rate limiting
 const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,
+  windowMs: 60 * 1000,   // 1 minute
   max: 120,
   standardHeaders: true,
   legacyHeaders: false,
@@ -65,6 +75,7 @@ app.use(globalLimiter);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+app.use('/css', express.static(path.join(__dirname, 'public/css')));
 
 // Body parsing + locals
 app.use(express.json());
@@ -74,10 +85,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Per-route limiter for index render
+// Per-route limiters
 const renderLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+const calcLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -100,13 +117,39 @@ const renderLimiter = rateLimit({
       next();
     });
 
-    // Routes
+    // ---- Routes ----
     app.get('/', renderLimiter, indexController.getIndexPage);
+
+    // Explicitly reject GET /calculate
+    app.get('/calculate', (req, res) => {
+      res.set('Allow', 'POST');
+      return res.sendStatus(405);
+    });
+
+    // POST /calculate 
+    app.post(
+      '/calculate',
+      calcLimiter,
+      (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); },
+      indexController.calculatePlanner
+    );
+
     app.use('/banners', bannerRoutes);
-    app.post('/calculate', indexController.calculatePlanner);
+
+    // 404 Handler
+    app.use((req, res) => {
+      res.status(404).render('pages/404');
+    });
+
+    // 500 Handler
+    app.use((err, req, res, next) => {
+      console.error(err);
+      res.status(500).render('pages/500');
+    });
 
     // Start server
-    const { PORT, HOST } = process.env;
+    const PORT = process.env.PORT || 3000;
+    const HOST = process.env.HOST || '0.0.0.0';
     app.listen(PORT, HOST, () => {
       console.log(`Server running on ${HOST}:${PORT}`);
     });
