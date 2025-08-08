@@ -12,7 +12,7 @@ const indexController = require('./app/controllers/indexController');
 const { loadCache } = require('./app/cache/bannerCache');
 
 // If behind a proxy/load balancer (Heroku/Render/Nginx/Cloudflare), uncomment:
-// app.set('trust proxy', 1);
+app.set('trust proxy', 1);
 
 // View engine
 app.set('view engine', 'ejs');
