@@ -59,70 +59,127 @@ function enableDragScroll(container) {
 async function loadTimeline() {
   try {
     const [charRes, supportRes] = await Promise.all([
-      fetch(`/banners/api/character-banners`),
-      fetch(`/banners/api/support-banners`)
+      fetch('/banners/api/character-banners'),
+      fetch('/banners/api/support-banners')
     ]);
 
     const characters = await charRes.json();
     const supports = await supportRes.json();
 
     const container = document.querySelector('.timeline-scroll');
-    container.innerHTML = '';
+    container.textContent = '';
 
-    // Gracefully handle mismatched card sizes
+    if (!Array.isArray(characters) || !Array.isArray(supports)) {
+      console.warn('Unexpected response shape for banners.');
+      return;
+    }
+
+    const len = Math.min(characters.length, supports.length);
     if (characters.length !== supports.length) {
       console.warn(
-        `Warning: Mismatched data — characters (${characters.length}) vs support cards (${supportCards.length}). Truncating to ${length}.`
+        `Warning: Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${len}.`
       );
     }
-    
-    for (let i = 0; i < characters.length; i++) {
-      const charBanner = characters[i];
-      const supportBanner = supports[i];
+
+    // Simple allowlist for image URLs (adjust as needed)
+    const isSafeImgUrl = (u) => {
+      try {
+        const url = new URL(u, location.origin); // resolves relative paths
+        return (
+          url.origin === location.origin ||
+          url.hostname.endsWith('gametora.com') ||
+          url.hostname.endsWith('yourcdn.example') // <- edit if you use a CDN
+        );
+      } catch {
+        return false;
+      }
+    };
+
+    const toLocalDate = (d) => {
+      if (!d) return 'Unknown';
+      const dt = new Date(d);
+      if (Number.isNaN(+dt)) return 'Unknown';
+      return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    };
+
+    const addDays = (d, n) => {
+      const dt = new Date(d);
+      if (Number.isNaN(+dt)) return null;
+      dt.setDate(dt.getDate() + n);
+      return dt;
+    };
+
+    for (let i = 0; i < len; i++) {
+      const charBanner = characters[i] ?? {};
+      const supportBanner = supports[i] ?? {};
 
       const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
       const endDateObj = addDays(startDateRaw, 11);
-
-      const startDate = formatLocalDate(startDateRaw);
-      const endDate = endDateObj
-        ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-        : 'Unknown';
+      const startDate = toLocalDate(startDateRaw);
+      const endDate = endDateObj ? toLocalDate(endDateObj) : 'Unknown';
 
       const cardWrapper = document.createElement('div');
       cardWrapper.className = 'timeline-card';
 
-      const charImageUrl = charBanner.image_path;
-    const supportImageUrl = supportBanner.image_path;
+      const card = document.createElement('div');
+      card.className = 'card select-banner-card';
+      card.dataset.index = String(i);
 
-    cardWrapper.innerHTML = `
-      <div class="card select-banner-card" data-index="${i}">
-        <div class="card-body">
-          <p class="mb-2 date-span">${startDate} → ${endDate}</p>
-          <hr class="my-2">
+      const body = document.createElement('div');
+      body.className = 'card-body';
 
-          <!-- Character Banner -->
-          <div class="banner-section">
-            <img src="${charImageUrl}" 
-                alt="${charBanner.uma_name}" 
-                class="banner-img"
-                onerror="this.onerror=null;this.src='/images/default.png';">
-            <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
-          </div>
+      const dateP = document.createElement('p');
+      dateP.className = 'mb-2 date-span';
+      dateP.textContent = `${startDate} → ${endDate}`;
 
-          <!-- Support Banner -->
-          <div class="banner-section">
-            <img src="${supportImageUrl}" 
-                alt="${supportBanner.support_name}" 
-                class="banner-img"
-                onerror="this.onerror=null;this.src='/images/default.png';">
-            <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
-          </div>
-        </div>
-      </div>
-    `;
+      const hr = document.createElement('hr');
+      hr.className = 'my-2';
 
-    container.appendChild(cardWrapper);
-  }
+      // Character banner section
+      const charSec = document.createElement('div');
+      charSec.className = 'banner-section';
+
+      const charImg = document.createElement('img');
+      charImg.className = 'banner-img';
+      charImg.alt = String(charBanner.uma_name || 'Character Banner');
+      if (isSafeImgUrl(charBanner.image_path)) {
+        charImg.src = new URL(charBanner.image_path, location.origin).toString();
+      } else {
+        charImg.src = '/images/default.png';
+      }
+      charImg.addEventListener('error', () => { charImg.src = '/images/default.png'; });
+
+      const charH3 = document.createElement('h3');
+      charH3.className = 'mb-2 uma-name';
+      charH3.textContent = String(charBanner.uma_name || 'Unknown');
+
+      charSec.append(charImg, charH3);
+
+      // Support banner section
+      const suppSec = document.createElement('div');
+      suppSec.className = 'banner-section';
+
+      const suppImg = document.createElement('img');
+      suppImg.className = 'banner-img';
+      suppImg.alt = String(supportBanner.support_name || 'Support Banner');
+      if (isSafeImgUrl(supportBanner.image_path)) {
+        suppImg.src = new URL(supportBanner.image_path, location.origin).toString();
+      } else {
+        suppImg.src = '/images/default.png';
+      }
+      suppImg.addEventListener('error', () => { suppImg.src = '/images/default.png'; });
+
+      const suppH3 = document.createElement('h3');
+      suppH3.className = 'mb-2 support-name';
+      suppH3.textContent = String(supportBanner.support_name || 'Unknown');
+
+      suppSec.append(suppImg, suppH3);
+
+      body.append(dateP, hr, charSec, suppSec);
+      card.append(body);
+      cardWrapper.append(card);
+      container.append(cardWrapper);
+    }
 
     // Drag vs click detection
     let dragStartX = 0;
@@ -135,37 +192,29 @@ async function loadTimeline() {
     });
 
     container.addEventListener('mousemove', (e) => {
-      if (Math.abs(e.clientX - dragStartX) > dragThreshold) {
-        isDragging = true;
+      if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
+    });
+
+    container.addEventListener('click', (e) => {
+      const cardEl = e.target.closest('.select-banner-card');
+      if (cardEl && !isDragging) {
+        const index = Number(cardEl.dataset.index);
+
+        container.querySelectorAll('.timeline-card .card')
+          .forEach(el => el.classList.remove('selected', 'calculating'));
+
+        cardEl.classList.add('selected', 'calculating');
+
+        const saved = JSON.parse(localStorage.getItem('plannerSelections') || '{}');
+        saved.characterBanner = characters[index];
+        saved.supportBanner = supports[index];
+        localStorage.setItem('plannerSelections', JSON.stringify(saved));
+
+        debouncedCalculate(characters[index], supports[index]);
       }
     });
 
-    // Handle banner click
-    container.addEventListener('click', (e) => {
-  const card = e.target.closest('.select-banner-card');
-  if (card && !isDragging) {
-    const index = parseInt(card.dataset.index, 10);
-
-    // Clear previous selection and animations
-    container.querySelectorAll('.timeline-card .card').forEach(cardEl =>
-      cardEl.classList.remove('selected', 'calculating')
-    );
-
-    card.classList.add('selected', 'calculating');
-
-    // Save banner selection
-    const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
-    saved.characterBanner = characters[index];
-    saved.supportBanner = supports[index];
-    localStorage.setItem('plannerSelections', JSON.stringify(saved));
-
-    debouncedCalculate(characters[index], supports[index]);
-  }
-});
-
-    const event = new Event('timelineLoaded');
-    window.dispatchEvent(event);
-
+    window.dispatchEvent(new Event('timelineLoaded'));
   } catch (err) {
     console.error('Failed to load banners:', err);
   }
