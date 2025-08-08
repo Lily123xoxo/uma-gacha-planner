@@ -56,6 +56,25 @@ function enableDragScroll(container) {
   });
 }
 
+// ---- helpers (define once) ----
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Only allow relative URLs / same-origin
+function safeImageSrc(url) {
+  try {
+    const u = new URL(url, location.origin); // supports relative
+    if (u.origin === location.origin) return u.toString();
+  } catch {}
+  return '/images/default.png';
+}
+
 async function loadTimeline() {
   try {
     const [charRes, supportRes] = await Promise.all([
@@ -67,118 +86,73 @@ async function loadTimeline() {
     const supports = await supportRes.json();
 
     const container = document.querySelector('.timeline-scroll');
-    container.textContent = '';
+    container.innerHTML = '';
 
     if (!Array.isArray(characters) || !Array.isArray(supports)) {
       console.warn('Unexpected response shape for banners.');
       return;
     }
 
-    const len = Math.min(characters.length, supports.length);
+    const length = Math.min(characters.length, supports.length);
     if (characters.length !== supports.length) {
       console.warn(
-        `Warning: Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${len}.`
+        `Warning: Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${length}.`
       );
     }
 
-    // Simple allowlist for image URLs (adjust as needed)
-    const isSafeImgUrl = (u) => {
-      try {
-        const url = new URL(u, location.origin); // resolves relative paths
-        return (
-          url.origin === location.origin ||
-          url.hostname.endsWith('gametora.com') ||
-          url.hostname.endsWith('yourcdn.example') // <- edit if you use a CDN
-        );
-      } catch {
-        return false;
-      }
-    };
-
-    const toLocalDate = (d) => {
-      if (!d) return 'Unknown';
-      const dt = new Date(d);
-      if (Number.isNaN(+dt)) return 'Unknown';
-      return dt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-    };
-
-    const addDays = (d, n) => {
-      const dt = new Date(d);
-      if (Number.isNaN(+dt)) return null;
-      dt.setDate(dt.getDate() + n);
-      return dt;
-    };
-
-    for (let i = 0; i < len; i++) {
-      const charBanner = characters[i] ?? {};
-      const supportBanner = supports[i] ?? {};
+    for (let i = 0; i < length; i++) {
+      const charBanner = characters[i];
+      const supportBanner = supports[i];
 
       const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
       const endDateObj = addDays(startDateRaw, 11);
-      const startDate = toLocalDate(startDateRaw);
-      const endDate = endDateObj ? toLocalDate(endDateObj) : 'Unknown';
+
+      const startDate = formatLocalDate(startDateRaw);
+      const endDate = endDateObj
+        ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+        : 'Unknown';
+
+      // Escape all interpolated text
+      const safeStart = escapeHTML(startDate);
+      const safeEnd = escapeHTML(endDate);
+      const safeUma = escapeHTML(charBanner?.uma_name);
+      const safeSupport = escapeHTML(supportBanner?.support_name);
+
+      // Whitelist image URLs (self only)
+      const charImageUrl = safeImageSrc(charBanner?.image_path);
+      const supportImageUrl = safeImageSrc(supportBanner?.image_path);
 
       const cardWrapper = document.createElement('div');
       cardWrapper.className = 'timeline-card';
 
-      const card = document.createElement('div');
-      card.className = 'card select-banner-card';
-      card.dataset.index = String(i);
+      // No inline event handlers (CSP-friendly)
+      cardWrapper.innerHTML = `
+        <div class="card select-banner-card" data-index="${i}">
+          <div class="card-body">
+            <p class="mb-2 date-span">${safeStart} → ${safeEnd}</p>
+            <hr class="my-2">
 
-      const body = document.createElement('div');
-      body.className = 'card-body';
+            <!-- Character Banner -->
+            <div class="banner-section">
+              <img src="${charImageUrl}" alt="${safeUma}" class="banner-img">
+              <h3 class="mb-2 uma-name">${safeUma}</h3>
+            </div>
 
-      const dateP = document.createElement('p');
-      dateP.className = 'mb-2 date-span';
-      dateP.textContent = `${startDate} → ${endDate}`;
+            <!-- Support Banner -->
+            <div class="banner-section">
+              <img src="${supportImageUrl}" alt="${safeSupport}" class="banner-img">
+              <h3 class="mb-2 support-name">${safeSupport}</h3>
+            </div>
+          </div>
+        </div>
+      `;
 
-      const hr = document.createElement('hr');
-      hr.className = 'my-2';
+      // Add runtime fallback for broken images (no inline onerror)
+      cardWrapper.querySelectorAll('img.banner-img').forEach(img => {
+        img.addEventListener('error', () => { img.src = '/images/default.png'; }, { once: true });
+      });
 
-      // Character banner section
-      const charSec = document.createElement('div');
-      charSec.className = 'banner-section';
-
-      const charImg = document.createElement('img');
-      charImg.className = 'banner-img';
-      charImg.alt = String(charBanner.uma_name || 'Character Banner');
-      if (isSafeImgUrl(charBanner.image_path)) {
-        charImg.src = new URL(charBanner.image_path, location.origin).toString();
-      } else {
-        charImg.src = '/images/default.png';
-      }
-      charImg.addEventListener('error', () => { charImg.src = '/images/default.png'; });
-
-      const charH3 = document.createElement('h3');
-      charH3.className = 'mb-2 uma-name';
-      charH3.textContent = String(charBanner.uma_name || 'Unknown');
-
-      charSec.append(charImg, charH3);
-
-      // Support banner section
-      const suppSec = document.createElement('div');
-      suppSec.className = 'banner-section';
-
-      const suppImg = document.createElement('img');
-      suppImg.className = 'banner-img';
-      suppImg.alt = String(supportBanner.support_name || 'Support Banner');
-      if (isSafeImgUrl(supportBanner.image_path)) {
-        suppImg.src = new URL(supportBanner.image_path, location.origin).toString();
-      } else {
-        suppImg.src = '/images/default.png';
-      }
-      suppImg.addEventListener('error', () => { suppImg.src = '/images/default.png'; });
-
-      const suppH3 = document.createElement('h3');
-      suppH3.className = 'mb-2 support-name';
-      suppH3.textContent = String(supportBanner.support_name || 'Unknown');
-
-      suppSec.append(suppImg, suppH3);
-
-      body.append(dateP, hr, charSec, suppSec);
-      card.append(body);
-      cardWrapper.append(card);
-      container.append(cardWrapper);
+      container.appendChild(cardWrapper);
     }
 
     // Drag vs click detection
@@ -192,19 +166,24 @@ async function loadTimeline() {
     });
 
     container.addEventListener('mousemove', (e) => {
-      if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
+      if (Math.abs(e.clientX - dragStartX) > dragThreshold) {
+        isDragging = true;
+      }
     });
 
+    // Handle banner click (no inline onclick)
     container.addEventListener('click', (e) => {
-      const cardEl = e.target.closest('.select-banner-card');
-      if (cardEl && !isDragging) {
-        const index = Number(cardEl.dataset.index);
+      const card = e.target.closest('.select-banner-card');
+      if (card && !isDragging) {
+        const index = parseInt(card.dataset.index, 10);
 
+        // Clear previous selection/animations
         container.querySelectorAll('.timeline-card .card')
-          .forEach(el => el.classList.remove('selected', 'calculating'));
+          .forEach(cardEl => cardEl.classList.remove('selected', 'calculating'));
 
-        cardEl.classList.add('selected', 'calculating');
+        card.classList.add('selected', 'calculating');
 
+        // Save banner selection
         const saved = JSON.parse(localStorage.getItem('plannerSelections') || '{}');
         saved.characterBanner = characters[index];
         saved.supportBanner = supports[index];

@@ -22,8 +22,9 @@ app.use(helmet({
   contentSecurityPolicy: {
     useDefaults: true,
     directives: {
+      "script-src-attr": ["'none'"],
       "script-src": ["'self'"],
-      "img-src": ["'self'", "https://gametora.com", "https://yourcdn.example"],
+      "img-src": ["'self'", "data:"],       
     },
   },
 }));
