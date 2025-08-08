@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const helmet = require('helmet');
 const app = express();
 const indexRoutes = require('./app/routes/index');
 const bannerRoutes = require('./app/routes/bannerRoutes');
@@ -16,6 +17,8 @@ app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstra
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Middleware
+app.use(helmet());
+app.disable('x-powered-by');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
