@@ -1,6 +1,7 @@
+// ---------- utils ----------
 function debounce(fn, delay) {
   let timeout;
-  return function(...args) {
+  return function (...args) {
     clearTimeout(timeout);
     timeout = setTimeout(() => fn.apply(this, args), delay);
   };
@@ -9,11 +10,7 @@ function debounce(fn, delay) {
 function formatLocalDate(dateString) {
   if (!dateString) return 'Unknown';
   const date = new Date(dateString);
-  return date.toLocaleDateString(undefined, { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
-  });
+  return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function addDays(dateString, days) {
@@ -31,7 +28,7 @@ function enableDragScroll(container) {
   function onMouseMove(e) {
     if (!isDragging) return;
     const x = e.pageX - container.offsetLeft;
-    const walk = (x - startX) * 0.8; // adjust multiplier for weight
+    const walk = (x - startX) * 0.8;
     container.scrollLeft = scrollLeft - walk;
   }
 
@@ -47,16 +44,13 @@ function enableDragScroll(container) {
     startX = e.pageX - container.offsetLeft;
     scrollLeft = container.scrollLeft;
     container.style.cursor = 'grabbing';
-
-    // Attach global listeners
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
-
-    e.preventDefault(); // prevent text selection
+    e.preventDefault();
   });
 }
 
-// ---- helpers (define once) ----
+// ---- helpers ----
 function escapeHTML(value) {
   return String(value ?? '')
     .replace(/&/g, '&amp;')
@@ -75,144 +69,62 @@ function safeImageSrc(url) {
   return '/images/default.png';
 }
 
-async function loadTimeline() {
-  const container = document.querySelector('.timeline-scroll');
-  if (!container) return;
-
-  try {
-    const [charRes, supportRes] = await Promise.all([
-      fetch('/banners/api/character-banners', { credentials: 'same-origin' }),
-      fetch('/banners/api/support-banners',   { credentials: 'same-origin' })
-    ]);
-
-    const characters = await charRes.json();
-    const supports   = await supportRes.json();
-
-    container.innerHTML = '';
-
-    const len = Math.min(characters.length, supports.length);
-    if (characters.length !== supports.length) {
-      console.warn(`Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${len}.`);
-    }
-
-    // ---- Observer: hydrate cards when near viewport ----
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        const imgs = e.target.querySelectorAll('img[data-src]');
-        imgs.forEach(img => {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-        });
-        e.target.classList.add('is-hydrated');
-        io.unobserve(e.target);
-      }
-    }, { root: container, rootMargin: '300px 0px', threshold: 0.01 });
-
-    const placeholder = '/images/default.png'; // tiny or existing default
-
-    for (let i = 0; i < len; i++) {
-      const charBanner    = characters[i];
-      const supportBanner = supports[i];
-
-      const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
-      const endDateObj   = addDays(startDateRaw, 11);
-
-      const startDate = formatLocalDate(startDateRaw);
-      const endDate   = endDateObj
-        ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-        : 'Unknown';
-
-      const cardWrapper = document.createElement('div');
-      cardWrapper.className = 'timeline-card';
-
-      // build card markup (no inline JS)
-      cardWrapper.innerHTML = `
-        <div class="card select-banner-card" data-index="${i}">
-          <div class="card-body">
-            <p class="mb-2 date-span">${startDate} → ${endDate}</p>
-            <hr class="my-2">
-
-            <div class="banner-section">
-              <img
-                class="banner-img"
-                alt="${charBanner.uma_name}"
-                loading="lazy"
-                decoding="async"
-                fetchpriority="low"
-                src="${placeholder}"
-                data-src="${charBanner.image_path}">
-              <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
-            </div>
-
-            <div class="banner-section">
-              <img
-                class="banner-img"
-                alt="${supportBanner.support_name}"
-                loading="lazy"
-                decoding="async"
-                fetchpriority="low"
-                src="${placeholder}"
-                data-src="${supportBanner.image_path}">
-              <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
-            </div>
-          </div>
-        </div>
-      `;
-
-      // error fallback (CSP-safe)
-      cardWrapper.querySelectorAll('img.banner-img').forEach(img => {
-        img.addEventListener('error', function onErr() {
-          if (this.src !== location.origin + placeholder && !this.src.endsWith(placeholder)) {
-            this.src = placeholder;
-          }
-        }, { once: false });
-      });
-
-      container.appendChild(cardWrapper);
-      io.observe(cardWrapper);
-    }
-
-    // Drag vs click detection (unchanged)
-    let dragStartX = 0;
-    let isDragging = false;
-    const dragThreshold = 15;
-
-    container.addEventListener('mousedown', (e) => {
-      dragStartX = e.clientX;
-      isDragging = false;
-    });
-    container.addEventListener('mousemove', (e) => {
-      if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
-    });
-
-    // Handle banner click
-    container.addEventListener('click', (e) => {
-      const card = e.target.closest('.select-banner-card');
-      if (!card || isDragging) return;
-
-      const index = parseInt(card.dataset.index, 10);
-
-      container.querySelectorAll('.timeline-card .card')
-        .forEach(el => el.classList.remove('selected', 'calculating'));
-
-      card.classList.add('selected', 'calculating');
-
-      const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
-      saved.characterBanner = characters[index];
-      saved.supportBanner   = supports[index];
-      localStorage.setItem('plannerSelections', JSON.stringify(saved));
-
-      debouncedCalculate(characters[index], supports[index]);
-    });
-
-    window.dispatchEvent(new Event('timelineLoaded'));
-  } catch (err) {
-    console.error('Failed to load banners:', err);
+// ---------- small element builder ----------
+function el(tag, attrs = {}, children = []) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else node.setAttribute(k, v);
   }
+  if (!Array.isArray(children)) children = [children];
+  for (const c of children) {
+    if (c == null) continue;
+    node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return node;
 }
 
+function buildBannerSection(imgAlt, imgSrc, titleText, placeholder) {
+  const img = el('img', {
+    class: 'banner-img',
+    alt: imgAlt,
+    loading: 'lazy',
+    decoding: 'async',
+    fetchpriority: 'low',
+    src: placeholder,
+    'data-src': imgSrc
+  });
+  const title = el('h3', { class: 'mb-2', text: titleText });
+  title.classList.add(imgAlt ? 'uma-name' : 'support-name'); // keep your classes
 
+  const section = el('div', { class: 'banner-section' }, [img, title]);
+
+  // error fallback
+  img.addEventListener('error', function () {
+    if (!this.src.endsWith(placeholder)) this.src = placeholder;
+  });
+
+  return section;
+}
+
+function buildCard(i, charBanner, supportBanner, startDate, endDate, placeholder) {
+  const wrapper = el('div', { class: 'timeline-card' });
+
+  const body = el('div', { class: 'card-body' }, [
+    el('p', { class: 'mb-2 date-span', text: `${startDate} → ${endDate}` }),
+    el('hr', { class: 'my-2' }),
+    buildBannerSection(charBanner.uma_name, charBanner.image_path, charBanner.uma_name, placeholder),
+    buildBannerSection(supportBanner.support_name, supportBanner.image_path, supportBanner.support_name, placeholder)
+  ]);
+
+  const card = el('div', { class: 'card select-banner-card', 'data-index': String(i) }, body);
+  wrapper.appendChild(card);
+  return wrapper;
+}
+
+// ---------- calculate ----------
 function triggerCalculate(characterBanner, supportBanner) {
   const payload = {
     carats: parseInt(document.querySelector('#carats')?.value) || 0,
@@ -233,37 +145,42 @@ function triggerCalculate(characterBanner, supportBanner) {
   fetch('/calculate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'same-origin',
     body: JSON.stringify(payload)
   })
     .then(res => res.json())
     .then(data => {
       const resultsDiv = document.querySelector('#results');
+      if (!resultsDiv) return;
+
+      // clear safely
+      resultsDiv.textContent = '';
+
       if (data.errors) {
-        resultsDiv.textContent = `Error: ${data.errors.map(e => e.msg).join(', ')}`;
-      } else {
-        resultsDiv.innerHTML = `
-        <div class="result-column">Rolls: ${data.rolls}</div>
-        <div class="result-column">Support Tickets: ${data.supportTickets}</div>
-        <div class="result-column">Character Tickets: ${data.characterTickets}</div>
-      `;
+        resultsDiv.appendChild(el('div', { class: 'result-column', text: `Error: ${data.errors.map(e => e.msg).join(', ')}` }));
+        return;
       }
+
+      resultsDiv.appendChild(el('div', { class: 'result-column', text: `Rolls: ${data.rolls}` }));
+      resultsDiv.appendChild(el('div', { class: 'result-column', text: `Support Tickets: ${data.supportTickets}` }));
+      resultsDiv.appendChild(el('div', { class: 'result-column', text: `Character Tickets: ${data.characterTickets}` }));
     })
     .catch(err => {
-      document.querySelector('#results').textContent = `Calculation failed: ${err.message}`;
+      const resultsDiv = document.querySelector('#results');
+      if (resultsDiv) resultsDiv.textContent = `Calculation failed: ${err.message}`;
     });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadTimeline();
-  const container = document.querySelector('.timeline-scroll');
-  enableDragScroll(container);
-});
+const debouncedCalculate = debounce((characterBanner, supportBanner) => {
+  triggerCalculate(characterBanner, supportBanner);
+}, 400);
 
+// ---------- search ----------
 let searchMatches = [];
 let currentMatchIndex = -1;
 
 function performSearch(query) {
-  // Clear previous highlights on inner cards
+  // Clear previous highlights
   document.querySelectorAll('.timeline-card .card.highlight').forEach(el =>
     el.classList.remove('highlight')
   );
@@ -293,23 +210,121 @@ function scrollToCurrentMatch() {
   card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 }
 
-document.querySelector('#timeline-search').addEventListener('input', (e) => {
-  performSearch(e.target.value);
-});
+// ---------- timeline load ----------
+async function loadTimeline() {
+  const container = document.querySelector('.timeline-scroll');
+  if (!container) return;
 
-document.querySelector('#search-next').addEventListener('click', () => {
-  if (searchMatches.length === 0) return;
-  currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
-  scrollToCurrentMatch();
-});
+  try {
+    const [charRes, supportRes] = await Promise.all([
+      fetch('/banners/api/character-banners', { credentials: 'same-origin' }),
+      fetch('/banners/api/support-banners',   { credentials: 'same-origin' })
+    ]);
 
-document.querySelector('#search-prev').addEventListener('click', () => {
-  if (searchMatches.length === 0) return;
-  currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
-  scrollToCurrentMatch();
-});
+    const characters = await charRes.json();
+    const supports   = await supportRes.json();
 
-// Debounced wrapper for triggerCalculate()
-const debouncedCalculate = debounce((characterBanner, supportBanner) => {
-  triggerCalculate(characterBanner, supportBanner);
-}, 400);
+    container.textContent = '';
+
+    const len = Math.min(characters.length, supports.length);
+    if (characters.length !== supports.length) {
+      console.warn(`Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${len}.`);
+    }
+
+    // Lazy load when card enters viewport
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const imgs = e.target.querySelectorAll('img[data-src]');
+        imgs.forEach(img => {
+          img.src = img.getAttribute('data-src');
+          img.removeAttribute('data-src');
+        });
+        e.target.classList.add('is-hydrated');
+        io.unobserve(e.target);
+      }
+    }, { root: container, rootMargin: '300px 0px', threshold: 0.01 });
+
+    const placeholder = '/images/default.png';
+
+    for (let i = 0; i < len; i++) {
+      const charBanner    = characters[i];
+      const supportBanner = supports[i];
+
+      const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
+      const endDateObj   = addDays(startDateRaw, 11);
+
+      const startDate = formatLocalDate(startDateRaw);
+      const endDate   = endDateObj
+        ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+        : 'Unknown';
+
+      const cardWrapper = buildCard(i, charBanner, supportBanner, startDate, endDate, placeholder);
+
+      container.appendChild(cardWrapper);
+      io.observe(cardWrapper);
+    }
+
+    // Drag vs click detection
+    let dragStartX = 0;
+    let isDragging = false;
+    const dragThreshold = 15;
+
+    container.addEventListener('mousedown', (e) => {
+      dragStartX = e.clientX;
+      isDragging = false;
+    });
+    container.addEventListener('mousemove', (e) => {
+      if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
+    });
+
+    // Click to select + calculate
+    container.addEventListener('click', (e) => {
+      const card = e.target.closest('.select-banner-card');
+      if (!card || isDragging) return;
+
+      const index = parseInt(card.dataset.index, 10);
+
+      container.querySelectorAll('.timeline-card .card')
+        .forEach(el => el.classList.remove('selected', 'calculating'));
+
+      card.classList.add('selected', 'calculating');
+
+      const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
+      saved.characterBanner = characters[index];
+      saved.supportBanner   = supports[index];
+      localStorage.setItem('plannerSelections', JSON.stringify(saved));
+
+      debouncedCalculate(characters[index], supports[index]);
+    });
+
+    window.dispatchEvent(new Event('timelineLoaded'));
+  } catch (err) {
+    console.error('Failed to load banners:', err);
+  }
+}
+
+// ---------- boot ----------
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadTimeline();
+
+  // search wiring
+  const input = document.querySelector('#timeline-search');
+  const prev  = document.querySelector('#search-prev');
+  const next  = document.querySelector('#search-next');
+
+  if (input) input.addEventListener('input', (e) => performSearch(e.target.value));
+  if (next)  next.addEventListener('click', () => {
+    if (!searchMatches.length) return;
+    currentMatchIndex = (currentMatchIndex + 1) % searchMatches.length;
+    scrollToCurrentMatch();
+  });
+  if (prev)  prev.addEventListener('click', () => {
+    if (!searchMatches.length) return;
+    currentMatchIndex = (currentMatchIndex - 1 + searchMatches.length) % searchMatches.length;
+    scrollToCurrentMatch();
+  });
+
+  const container = document.querySelector('.timeline-scroll');
+  if (container) enableDragScroll(container);
+});
