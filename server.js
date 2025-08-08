@@ -18,6 +18,15 @@ app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
 // Middleware
 app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "script-src": ["'self'"],
+      "img-src": ["'self'", "https://gametora.com", "https://yourcdn.example"],
+    },
+  },
+}));
 app.disable('x-powered-by');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

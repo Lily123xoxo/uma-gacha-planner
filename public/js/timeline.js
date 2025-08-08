@@ -92,38 +92,37 @@ async function loadTimeline() {
       cardWrapper.className = 'timeline-card';
 
       const charImageUrl = charBanner.image_path;
-const supportImageUrl = supportBanner.image_path;
+    const supportImageUrl = supportBanner.image_path;
 
-cardWrapper.innerHTML = `
-  <div class="card select-banner-card" data-index="${i}">
-    <div class="card-body">
-      <p class="mb-2 date-span">${startDate} → ${endDate}</p>
-      <hr class="my-2">
+    cardWrapper.innerHTML = `
+      <div class="card select-banner-card" data-index="${i}">
+        <div class="card-body">
+          <p class="mb-2 date-span">${startDate} → ${endDate}</p>
+          <hr class="my-2">
 
-      <!-- Character Banner -->
-      <div class="banner-section">
-        <img src="${charImageUrl}" 
-             alt="${charBanner.uma_name}" 
-             class="banner-img"
-             onerror="this.onerror=null;this.src='/images/default.png';">
-        <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
+          <!-- Character Banner -->
+          <div class="banner-section">
+            <img src="${charImageUrl}" 
+                alt="${charBanner.uma_name}" 
+                class="banner-img"
+                onerror="this.onerror=null;this.src='/images/default.png';">
+            <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
+          </div>
+
+          <!-- Support Banner -->
+          <div class="banner-section">
+            <img src="${supportImageUrl}" 
+                alt="${supportBanner.support_name}" 
+                class="banner-img"
+                onerror="this.onerror=null;this.src='/images/default.png';">
+            <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
+          </div>
+        </div>
       </div>
+    `;
 
-      <!-- Support Banner -->
-      <div class="banner-section">
-        <img src="${supportImageUrl}" 
-             alt="${supportBanner.support_name}" 
-             class="banner-img"
-             onerror="this.onerror=null;this.src='/images/default.png';">
-        <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
-      </div>
-    </div>
-  </div>
-`;
-
-
-      container.appendChild(cardWrapper);
-    }
+    container.appendChild(cardWrapper);
+  }
 
     // Drag vs click detection
     let dragStartX = 0;
