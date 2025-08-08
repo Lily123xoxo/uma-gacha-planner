@@ -192,6 +192,9 @@ body {
   padding-bottom: 1rem;
 }
 
+.banner-img { content-visibility: auto; contain-intrinsic-size: 300px 100px; }
+.timeline-card.is-hydrated .banner-img { transition: filter .2s; filter: none; }
+
 .timeline-scroll.dragging {
   cursor: grabbing;
 }
@@ -331,6 +334,8 @@ body {
     margin: 0 auto;       
   }
 }
+
+
 
 @media (min-width: 576px) and (max-width: 767.98px) {
   body {

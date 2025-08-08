@@ -76,86 +76,104 @@ function safeImageSrc(url) {
 }
 
 async function loadTimeline() {
+  const container = document.querySelector('.timeline-scroll');
+  if (!container) return;
+
   try {
     const [charRes, supportRes] = await Promise.all([
-      fetch('/banners/api/character-banners'),
-      fetch('/banners/api/support-banners')
+      fetch('/banners/api/character-banners', { credentials: 'same-origin' }),
+      fetch('/banners/api/support-banners',   { credentials: 'same-origin' })
     ]);
 
     const characters = await charRes.json();
-    const supports = await supportRes.json();
+    const supports   = await supportRes.json();
 
-    const container = document.querySelector('.timeline-scroll');
     container.innerHTML = '';
 
-    if (!Array.isArray(characters) || !Array.isArray(supports)) {
-      console.warn('Unexpected response shape for banners.');
-      return;
-    }
-
-    const length = Math.min(characters.length, supports.length);
+    const len = Math.min(characters.length, supports.length);
     if (characters.length !== supports.length) {
-      console.warn(
-        `Warning: Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${length}.`
-      );
+      console.warn(`Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${len}.`);
     }
 
-    for (let i = 0; i < length; i++) {
-      const charBanner = characters[i];
+    // ---- Observer: hydrate cards when near viewport ----
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const imgs = e.target.querySelectorAll('img[data-src]');
+        imgs.forEach(img => {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
+        });
+        e.target.classList.add('is-hydrated');
+        io.unobserve(e.target);
+      }
+    }, { root: container, rootMargin: '300px 0px', threshold: 0.01 });
+
+    const placeholder = '/images/default.png'; // tiny or existing default
+
+    for (let i = 0; i < len; i++) {
+      const charBanner    = characters[i];
       const supportBanner = supports[i];
 
       const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
-      const endDateObj = addDays(startDateRaw, 11);
+      const endDateObj   = addDays(startDateRaw, 11);
 
       const startDate = formatLocalDate(startDateRaw);
-      const endDate = endDateObj
+      const endDate   = endDateObj
         ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
         : 'Unknown';
-
-      // Escape all interpolated text
-      const safeStart = escapeHTML(startDate);
-      const safeEnd = escapeHTML(endDate);
-      const safeUma = escapeHTML(charBanner?.uma_name);
-      const safeSupport = escapeHTML(supportBanner?.support_name);
-
-      // Whitelist image URLs (self only)
-      const charImageUrl = safeImageSrc(charBanner?.image_path);
-      const supportImageUrl = safeImageSrc(supportBanner?.image_path);
 
       const cardWrapper = document.createElement('div');
       cardWrapper.className = 'timeline-card';
 
-      // No inline event handlers (CSP-friendly)
+      // build card markup (no inline JS)
       cardWrapper.innerHTML = `
         <div class="card select-banner-card" data-index="${i}">
           <div class="card-body">
-            <p class="mb-2 date-span">${safeStart} → ${safeEnd}</p>
+            <p class="mb-2 date-span">${startDate} → ${endDate}</p>
             <hr class="my-2">
 
-            <!-- Character Banner -->
             <div class="banner-section">
-              <img src="${charImageUrl}" alt="${safeUma}" class="banner-img">
-              <h3 class="mb-2 uma-name">${safeUma}</h3>
+              <img
+                class="banner-img"
+                alt="${charBanner.uma_name}"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+                src="${placeholder}"
+                data-src="${charBanner.image_path}">
+              <h3 class="mb-2 uma-name">${charBanner.uma_name}</h3>
             </div>
 
-            <!-- Support Banner -->
             <div class="banner-section">
-              <img src="${supportImageUrl}" alt="${safeSupport}" class="banner-img">
-              <h3 class="mb-2 support-name">${safeSupport}</h3>
+              <img
+                class="banner-img"
+                alt="${supportBanner.support_name}"
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+                src="${placeholder}"
+                data-src="${supportBanner.image_path}">
+              <h3 class="mb-2 support-name">${supportBanner.support_name}</h3>
             </div>
           </div>
         </div>
       `;
 
-      // Add runtime fallback for broken images (no inline onerror)
+      // error fallback (CSP-safe)
       cardWrapper.querySelectorAll('img.banner-img').forEach(img => {
-        img.addEventListener('error', () => { img.src = '/images/default.png'; }, { once: true });
+        img.addEventListener('error', function onErr() {
+          if (this.src !== location.origin + placeholder && !this.src.endsWith(placeholder)) {
+            this.src = placeholder;
+          }
+        }, { once: false });
       });
 
       container.appendChild(cardWrapper);
+      io.observe(cardWrapper);
     }
 
-    // Drag vs click detection
+    // Drag vs click detection (unchanged)
     let dragStartX = 0;
     let isDragging = false;
     const dragThreshold = 15;
@@ -164,33 +182,28 @@ async function loadTimeline() {
       dragStartX = e.clientX;
       isDragging = false;
     });
-
     container.addEventListener('mousemove', (e) => {
-      if (Math.abs(e.clientX - dragStartX) > dragThreshold) {
-        isDragging = true;
-      }
+      if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
     });
 
-    // Handle banner click (no inline onclick)
+    // Handle banner click
     container.addEventListener('click', (e) => {
       const card = e.target.closest('.select-banner-card');
-      if (card && !isDragging) {
-        const index = parseInt(card.dataset.index, 10);
+      if (!card || isDragging) return;
 
-        // Clear previous selection/animations
-        container.querySelectorAll('.timeline-card .card')
-          .forEach(cardEl => cardEl.classList.remove('selected', 'calculating'));
+      const index = parseInt(card.dataset.index, 10);
 
-        card.classList.add('selected', 'calculating');
+      container.querySelectorAll('.timeline-card .card')
+        .forEach(el => el.classList.remove('selected', 'calculating'));
 
-        // Save banner selection
-        const saved = JSON.parse(localStorage.getItem('plannerSelections') || '{}');
-        saved.characterBanner = characters[index];
-        saved.supportBanner = supports[index];
-        localStorage.setItem('plannerSelections', JSON.stringify(saved));
+      card.classList.add('selected', 'calculating');
 
-        debouncedCalculate(characters[index], supports[index]);
-      }
+      const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
+      saved.characterBanner = characters[index];
+      saved.supportBanner   = supports[index];
+      localStorage.setItem('plannerSelections', JSON.stringify(saved));
+
+      debouncedCalculate(characters[index], supports[index]);
     });
 
     window.dispatchEvent(new Event('timelineLoaded'));
@@ -198,6 +211,7 @@ async function loadTimeline() {
     console.error('Failed to load banners:', err);
   }
 }
+
 
 function triggerCalculate(characterBanner, supportBanner) {
   const payload = {

@@ -31,11 +31,10 @@ app.use(helmet({
       "default-src": ["'self'"],
       "script-src": ["'self'"],
       "script-src-attr": ["'none'"],
-      "style-src": ["'self'"],
-      "font-src": ["'self'", "data:"],
+      "style-src": ["'self'", "https://cdn.jsdelivr.net"],
+      "font-src": ["'self'", "https://cdn.jsdelivr.net", "data:"],
       "img-src": ["'self'", "data:"],
       "connect-src": ["'self'"],
-      // Explicit no-fallback directives
       "frame-ancestors": ["'none'"],
       "form-action": ["'self'"],
       "object-src": ["'none'"],
@@ -62,15 +61,6 @@ if (app.get('env') === 'production') {
 // Hide Express
 app.disable('x-powered-by');
 
-// --- Global rate limiting
-const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,   // 1 minute
-  max: 120,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(globalLimiter);
-
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap/dist')));
@@ -85,20 +75,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Per-route limiters
-const renderLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
+// --- Global rate limiting
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,   // 1 minute
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
 });
-const calcLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+app.use(globalLimiter);
 
+// Per-route limiters
+const renderLimiter = rateLimit({ windowMs: 60_000, max: 30, standardHeaders: true, legacyHeaders: false });
+const calcLimiter   = rateLimit({ windowMs: 60_000, max: 30, standardHeaders: true, legacyHeaders: false });
 // -----------------------------
 // ASYNC SERVER BOOTSTRAP
 // -----------------------------
@@ -116,9 +104,11 @@ const calcLimiter = rateLimit({
       console.log(`[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
       next();
     });
-
+    
     // ---- Routes ----
-    app.get('/', renderLimiter, indexController.getIndexPage);
+    app.get('/',
+      renderLimiter,
+      indexController.getIndexPage);
 
     // Explicitly reject GET /calculate
     app.get('/calculate', (req, res) => {
