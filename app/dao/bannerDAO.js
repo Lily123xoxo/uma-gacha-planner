@@ -2,7 +2,7 @@ const db = require('../config/db');
 const mysql = require('mysql2');
 
 async function getCharacterBanners(limit = 90) {
-  const safeLimit = parseInt(limit, 10) || 90;
+  const safeLimit = parseInt(limit, 10) || 100;
   const query = mysql.format(
     `
     SELECT id, uma_name, jp_release_date, global_actual_date, global_est_date,
@@ -21,7 +21,7 @@ async function getCharacterBanners(limit = 90) {
 
 
 async function getSupportBanners(limit = 90) {
-  const safeLimit = parseInt(limit, 10) || 90;
+  const safeLimit = parseInt(limit, 10) || 100;
   const query = mysql.format(
     `
     SELECT id, support_name, jp_release_date, global_actual_date, global_est_date,

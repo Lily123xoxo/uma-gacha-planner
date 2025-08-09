@@ -29,7 +29,7 @@ const teamTrialsRankMap = {
 };
 
 const CARATS_PER_ROLL = 150;
-const WEEKLY_LOGIN_CARATS = 110;
+const WEEKLY_LOGIN_CARATS = 110; // 110 carats a week for logging in every day
 const MONTHLY_PASS_DAILY_CARATS = 50;
 const MONTHLY_PASS_IMMEDIATE_CARATS = 500;
 const DAILY_MISSION_CARATS = 30;
@@ -66,13 +66,16 @@ function calculateMonthlyCarats(options, months) {
   return { carats, supportTickets, characterTickets };
 }
 
-
-
 /**
  * Calculates additional carats from weekly rewards.
  */
 function calculateWeeklyCarats(options, weeks) {
-  carats = (WEEKLY_LOGIN_CARATS * weeks) + (teamTrialsRankMap[options.teamTrialsRank] || 0)
+  if (options.dailyLogin){
+    carats = (WEEKLY_LOGIN_CARATS * weeks) + (teamTrialsRankMap[options.teamTrialsRank] || 0)
+  }
+  else {
+    carats = (teamTrialsRankMap[options.teamTrialsRank] || 0)
+  }
   return carats;
 }
 

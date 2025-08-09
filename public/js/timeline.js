@@ -86,7 +86,7 @@ function el(tag, attrs = {}, children = []) {
   return node;
 }
 
-function buildBannerSection(imgAlt, imgSrc, titleText, placeholder) {
+function buildBannerSection(imgAlt, imgSrc, titleText, placeholder, kind) {
   const img = el('img', {
     class: 'banner-img',
     alt: imgAlt,
@@ -96,12 +96,12 @@ function buildBannerSection(imgAlt, imgSrc, titleText, placeholder) {
     src: placeholder,
     'data-src': imgSrc
   });
+
   const title = el('h3', { class: 'mb-2', text: titleText });
-  title.classList.add(imgAlt ? 'uma-name' : 'support-name'); // keep your classes
+  title.classList.add(kind === 'support' ? 'support-name' : 'uma-name');
 
   const section = el('div', { class: 'banner-section' }, [img, title]);
 
-  // error fallback
   img.addEventListener('error', function () {
     if (!this.src.endsWith(placeholder)) this.src = placeholder;
   });
@@ -115,8 +115,8 @@ function buildCard(i, charBanner, supportBanner, startDate, endDate, placeholder
   const body = el('div', { class: 'card-body' }, [
     el('p', { class: 'mb-2 date-span', text: `${startDate} → ${endDate}` }),
     el('hr', { class: 'my-2' }),
-    buildBannerSection(charBanner.uma_name, charBanner.image_path, charBanner.uma_name, placeholder),
-    buildBannerSection(supportBanner.support_name, supportBanner.image_path, supportBanner.support_name, placeholder)
+    buildBannerSection(charBanner.uma_name,     charBanner.image_path,     charBanner.uma_name,     placeholder, 'uma'),
+    buildBannerSection(supportBanner.support_name, supportBanner.image_path, supportBanner.support_name, placeholder, 'support')
   ]);
 
   const card = el('div', { class: 'card select-banner-card', 'data-index': String(i) }, body);
@@ -286,9 +286,9 @@ async function loadTimeline() {
       const index = parseInt(card.dataset.index, 10);
 
       container.querySelectorAll('.timeline-card .card')
-        .forEach(el => el.classList.remove('selected', 'calculating'));
+        .forEach(el => el.classList.remove('selected'));
 
-      card.classList.add('selected', 'calculating');
+      card.classList.add('selected');
 
       const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
       saved.characterBanner = characters[index];
