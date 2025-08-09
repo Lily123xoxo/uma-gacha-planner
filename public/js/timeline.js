@@ -286,9 +286,9 @@ async function loadTimeline() {
       const index = parseInt(card.dataset.index, 10);
 
       container.querySelectorAll('.timeline-card .card')
-        .forEach(el => el.classList.remove('selected'));
+        .forEach(el => el.classList.remove('selected', 'calculating'));
 
-      card.classList.add('selected');
+      card.classList.add('selected', 'calculating');
 
       const saved = JSON.parse(localStorage.getItem('plannerSelections')) || {};
       saved.characterBanner = characters[index];

@@ -219,6 +219,21 @@ body {
   transition: box-shadow 0.25s ease, transform 0.2s ease;
 }
 
+.select-banner-card.selected.calculating::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 10px 4px 12px 8px var(--primary-site-color);
+  border-color: var(--primary-site-color);
+  animation: fadeAura 1.5s ease-out 1 forwards;
+  z-index: 2;
+}
+
 .support-name {
   color: var(--support-text-color);
   font-size: inherit;
@@ -263,6 +278,17 @@ body {
 .timeline-card .card.selected.select-banner-card:hover {
   border: 5px solid var(--primary-site-color);
   box-shadow: 10px 4px 10px -3px var(--primary-site-color);
+}
+
+.timeline-card .card.selected.select-banner-card:hover:active,
+.timeline-card .card.selected.select-banner-card:active {
+  border: 5px solid var(--tertiary-site-color);
+  box-shadow: 10px 4px 10px -3px var(--tertiary-site-color);
+}
+
+.timeline-card .card.select-banner-card:has(:active) {
+  border: 5px solid var(--tertiary-site-color);
+  box-shadow: 10px 4px 10px -3px var(--tertiary-site-color);
 }
 
 .timeline-card .date-span {
