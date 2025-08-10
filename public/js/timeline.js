@@ -131,6 +131,8 @@ function triggerCalculate(characterBanner, supportBanner) {
     clubRank: document.querySelector('#clubRank')?.value || 'C',
     teamTrialsRank: document.querySelector('#teamTrialsRank')?.value || 'Class3',
     champMeeting: parseInt(document.querySelector('#champMeeting')?.value) || 1000,
+    characterTickets: parseInt(document.querySelector('#characterTickets')?.value) || 0,
+    supportTickets: parseInt(document.querySelector('#supportTickets')?.value) || 0,
     monthlyPass: document.querySelector('#monthlyPass')?.checked || false,
     dailyLogin: document.querySelector('#dailyLogin')?.checked || false,
     legendRace: document.querySelector('#legendRace')?.checked || false,

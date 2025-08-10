@@ -40,8 +40,8 @@ const LEGEND_RACE_MONTHLY_CARATS = 1000;
  */
 function calculateMonthlyCarats(options, months) {
   let carats = 0;
-  let supportTickets = 0;
-  let characterTickets = 0;
+  let supportTicketsGain = 0;
+  let characterTicketsGain = 0;
 
   for (let i = 0; i < months; i++) {
     carats += clubRankMap[options.clubRank] || 0;
@@ -50,32 +50,34 @@ function calculateMonthlyCarats(options, months) {
     if (options.legendRace) carats += LEGEND_RACE_MONTHLY_CARATS;
 
     if (options.rainbowCleat) {
-      supportTickets += 2;
-      characterTickets += 2;
+      supportTicketsGain += 2;
+      characterTicketsGain += 2;
     }
     if (options.goldCleat) {
-      supportTickets += 2;
-      characterTickets += 2;
+      supportTicketsGain += 2;
+      characterTicketsGain += 2;
     }
     if (options.silverCleat) {
-      supportTickets += 2;
-      characterTickets += 2;
+      supportTicketsGain += 2;
+      characterTicketsGain += 2;
     }
   }
 
-  return { carats, supportTickets, characterTickets };
+  return { carats, supportTickets: supportTicketsGain, characterTickets: characterTicketsGain };
 }
 
 /**
  * Calculates additional carats from weekly rewards.
  */
 function calculateWeeklyCarats(options, weeks) {
+  let carats = 0;
+
   if (options.dailyLogin){
-    carats = (WEEKLY_LOGIN_CARATS * weeks) + (teamTrialsRankMap[options.teamTrialsRank] || 0)
+    carats += (WEEKLY_LOGIN_CARATS * weeks)
   }
-  else {
-    carats = (teamTrialsRankMap[options.teamTrialsRank] || 0)
-  }
+  
+  carats += (teamTrialsRankMap[options.teamTrialsRank] || 0) * weeks;
+
   return carats;
 }
 
@@ -97,8 +99,8 @@ function calculateDailyCarats(options, days) {
 function calculateRolls(options) {
   const bannerStartDate = options.bannerStartDate;
   let totalCarats = options.carats || 0;
-  let supportTickets = 0;
-  let characterTickets = 0;
+  let supportTickets = options.supportTickets || 0;
+  let characterTickets = options.characterTickets || 0;
 
   if (!bannerStartDate) {
     return { rolls: 0, carats: totalCarats, supportTickets, characterTickets };

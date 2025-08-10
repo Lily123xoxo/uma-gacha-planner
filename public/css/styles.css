@@ -94,7 +94,7 @@ body {
   color: transparent;
 }
 
-/* Form CSS */
+/* Body */
 
 .banner-title-wrapper {
   border: 3px solid var(--tertiary-site-color);
@@ -106,6 +106,16 @@ body {
 .form-booleans {
   display: flex;
   flex-wrap: wrap;
+}
+
+.stockpile-card {
+  border: 1px solid var(--white-text-color);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.ticket-row {
+  display: flex;
 }
 
 .form-booleans .left-column {
@@ -150,8 +160,6 @@ body {
   font-size: 1.4rem;
   font-weight: var(--font-semibold);
 }
-
-/* Timeline CSS */
 
 #results {
   display: inline-flex;
@@ -348,12 +356,6 @@ body {
 }
 
 /* Adjust styles for different screen sizes */
-
-@media (max-width: 340px) {
-  #planner-form fieldset.form-booleans label {
-    font-size: 0.9rem;
-  }
-}
 
 @media (max-width: 575.98px) {
   .banner-search {

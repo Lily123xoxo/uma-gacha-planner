@@ -10,6 +10,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clubRank').value = data.clubRank || '';
     document.getElementById('teamTrialsRank').value = data.teamTrialsRank || '';
     document.getElementById('champMeeting').value = data.champMeeting || '';
+    document.getElementById('characterTickets').value = data.characterTickets || '';
+    document.getElementById('supportTickets').value = data.supportTickets || '';
     document.getElementById('monthlyPass').checked = data.monthlyPass || false;
     document.getElementById('dailyLogin').checked = data.dailyLogin || false;
     document.getElementById('legendRace').checked = data.legendRace || false;
@@ -45,6 +47,8 @@ function getPlannerSelections() {
     clubRank: document.getElementById('clubRank').value,
     teamTrialsRank: document.getElementById('teamTrialsRank').value,
     champMeeting: Number(document.getElementById('champMeeting').value),
+    characterTickets: Number(document.getElementById('characterTickets').value),
+    supportTickets: Number(document.getElementById('supportTickets').value),
     monthlyPass: document.getElementById('monthlyPass').checked,
     dailyLogin: document.getElementById('dailyLogin').checked,
     legendRace: document.getElementById('legendRace').checked,

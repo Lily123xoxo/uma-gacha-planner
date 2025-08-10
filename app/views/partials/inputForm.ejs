@@ -1,176 +1,139 @@
 <!-- Full-width section for the form -->
 <section class="form-container container-fluid">
-  <!-- Form wrapper with border -->
   <form id="planner-form" class="form-wrapper card rounded p-4">
-    
-    <!-- Group: Main input fields -->
-    <fieldset class="row g-4">
-      <legend class="visually-hidden">Planner Inputs</legend>
+    <div class="row g-4">
+      <!-- Current Stockpiles (spans both rows) -->
+      <div class="col-md-3 d-flex flex-column">
+        <section class="stockpile-card flex-grow-1">
+          <h2 class="h2-form-titles mb-3">My Warchest</h2>
 
-      <!-- Current Carats -->
-      <div class="col-md-3">
-        <label for="carats" class="form-label">Current Carats:</label>
-        <input
-          type="number"
-          min="0"
-          id="carats"
-          name="carats"
-          required
-          class="form-control text-light"
-        >
+          <!-- Current Carats -->
+          <label for="carats" class="form-label-carats carats-label text-end">Carats</label>
+          <input
+            type="number"
+            min="0"
+            id="carats"
+            name="carats"
+            required
+            class="form-control text-light mb-3"
+          >
+
+          <!-- Tickets -->
+          <div class="row g-2 mb-3">
+            <div class="col-sm-6 d-flex flex-column">
+              <label for="characterTickets" class="form-label-tickets">Uma tickets</label>
+              <input
+                type="number"
+                min="0"
+                value="0"
+                id="characterTickets"
+                name="characterTickets"
+                required
+                class="form-control text-light ticket-input"
+              >
+            </div>
+            <div class="col-sm-6 d-flex flex-column">
+              <label for="supportTickets" class="form-label-tickets">Support tickets</label>
+              <input
+                type="number"
+                min="0"
+                value="0"
+                id="supportTickets"
+                name="supportTickets"
+                required
+                class="form-control text-light ticket-input"
+              >
+            </div>
+          </div>
+        </section>
       </div>
 
-      <!-- Club Rank -->
-      <div class="col-md-3">
-        <label for="clubRank" class="form-label">Club Rank:</label>
-        <select
-          id="clubRank"
-          name="clubRank"
-          required
-          class="form-select"
-        >
-          <option value="" disabled selected>Select a value</option>
-          <option value="SS">SS</option>
-          <option value="Splus">S+</option>
-          <option value="S">S</option>
-          <option value="Aplus">A+</option>
-          <option value="A">A</option>
-          <option value="Bplus">B+</option>
-          <option value="B">B</option>
-          <option value="Cplus">C+</option>
-          <option value="C">C</option>
-          <option value="Dplus">D+</option>
-        </select>
-      </div>
+      <!-- Right-hand side content -->
+      <div class="col-md-7">
+        <!-- Row 1: dropdowns -->
+        <div class="row g-4 mb-4 selectors-row">
+          <div class="col-md-4">
+            <label for="clubRank" class="form-label">Club Rank</label>
+            <select id="clubRank" name="clubRank" required class="form-select">
+              <option value="" disabled selected>Select a value</option>
+              <option value="SS">SS</option>
+              <option value="Splus">S+</option>
+              <option value="S">S</option>
+              <option value="Aplus">A+</option>
+              <option value="A">A</option>
+              <option value="Bplus">B+</option>
+              <option value="B">B</option>
+              <option value="Cplus">C+</option>
+              <option value="C">C</option>
+              <option value="Dplus">D+</option>
+            </select>
+          </div>
 
-      <!-- Team Trials Class -->
-      <div class="col-md-3">
-        <label for="teamTrialsRank" class="form-label">Team Trials Class:</label>
-        <select
-          id="teamTrialsRank"
-          name="teamTrialsRank"
-          required
-          class="form-select"
-        >
-          <option value="" disabled selected>Select a value</option>
-          <option value="Class6">Class 6</option>
-          <option value="Class5">Class 5</option>
-          <option value="Class4">Class 4</option>
-          <option value="Class3">Class 3</option>
-          <option value="Class2">Class 2</option>
-          <option value="Class1">Class 1</option>
-        </select>
-      </div>
+          <div class="col-md-4">
+            <label for="teamTrialsRank" class="form-label">Team Trials Class</label>
+            <select id="teamTrialsRank" name="teamTrialsRank" required class="form-select">
+              <option value="" disabled selected>Select a value</option>
+              <option value="Class6">Class 6</option>
+              <option value="Class5">Class 5</option>
+              <option value="Class4">Class 4</option>
+              <option value="Class3">Class 3</option>
+              <option value="Class2">Class 2</option>
+              <option value="Class1">Class 1</option>
+            </select>
+          </div>
 
-      <!-- Champion Meeting -->
-      <div class="col-md-3">
-        <label for="champMeeting" class="form-label">Expected CM Carat Gains:</label>
-        <select
-          id="champMeeting"
-          name="champMeeting"
-          required
-          class="form-select"
-        >
-          <option value="" disabled selected>Select a value</option>
-          <option value="2500">2500</option>
-          <option value="1800">1800</option>
-          <option value="1200">1200</option>
-          <option value="1000">1000</option>
-        </select>
-      </div>
-    </fieldset>
-
-    <!-- Group: Boolean options -->
-    <fieldset class="row mt-4 form-booleans">
-      <legend class="visually-hidden">Optional bonuses</legend>
-
-      <!-- Monthly/Daily bonuses -->
-      <div class="col-md-3">
-        <h2 class="h2-form-titles">Bonus Income:</h2>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="dailyLogin"
-            name="dailyLogin"
-            class="form-check-input bg-dark"
-          >
-          <label for="dailyLogin" class="form-check-label">
-            Daily login rewards
-          </label>
+          <div class="col-md-4">
+            <label for="champMeeting" class="form-label">Champions Meeting Gains</label>
+            <select id="champMeeting" name="champMeeting" required class="form-select">
+              <option value="" disabled selected>Select a value</option>
+              <option value="2500">2500</option>
+              <option value="1800">1800</option>
+              <option value="1200">1200</option>
+              <option value="1000">1000</option>
+            </select>
+          </div>
         </div>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="legendRace"
-            name="legendRace"
-            class="form-check-input bg-dark"
-          >
-          <label for="legendRace" class="form-check-label">
-            Legend races
-          </label>
-        </div>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="dailyMission"
-            name="dailyMission"
-            class="form-check-input bg-dark"
-          >
-          <label for="dailyMission" class="form-check-label">
-            Daily missions
-          </label>
+
+        <!-- Row 2: Bonus Income + Monthly Purchases -->
+        <div class="row g-4 booleans-row">
+          <div class="col-md-4">
+            <h2 class="h2-form-titles">Bonus Income</h2>
+            <div class="form-check">
+              <input type="checkbox" id="dailyLogin" name="dailyLogin" class="form-check-input bg-dark">
+              <label for="dailyLogin" class="form-check-label">Daily login rewards</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="legendRace" name="legendRace" class="form-check-input bg-dark">
+              <label for="legendRace" class="form-check-label">Legend races</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="dailyMission" name="dailyMission" class="form-check-input bg-dark">
+              <label for="dailyMission" class="form-check-label">Daily missions</label>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h2 class="h2-form-titles">Monthly Purchases</h2>
+            <div class="form-check">
+              <input type="checkbox" id="monthlyPass" name="monthlyPass" class="form-check-input bg-dark">
+              <label for="monthlyPass" class="form-check-label">Daily Carat Pack</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="rainbowCleat" name="rainbowCleat" class="form-check-input bg-dark">
+              <label for="rainbowCleat" class="form-check-label">Rainbow Cleats tickets</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="goldCleat" name="goldCleat" class="form-check-input bg-dark">
+              <label for="goldCleat" class="form-check-label">Gold Cleats tickets</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" id="silverCleat" name="silverCleat" class="form-check-input bg-dark">
+              <label for="silverCleat" class="form-check-label">Silver Cleats tickets</label>
+            </div>
+          </div>
         </div>
       </div>
-
-      <!-- Cleats bonuses -->
-      <div class="col-md-6">
-        <h2 class="h2-form-titles">Monthly Purchases: </h2>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="monthlyPass"
-            name="monthlyPass"
-            class="form-check-input bg-dark"
-          >
-          <label for="monthlyPass" class="form-check-label">
-            Daily Carat Pack
-          </label>
-        </div>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="rainbowCleat"
-            name="rainbowCleat"
-            class="form-check-input bg-dark"
-          >
-          <label for="rainbowCleat" class="form-check-label">
-            Four tickets with Rainbow Cleats
-          </label>
-        </div>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="goldCleat"
-            name="goldCleat"
-            class="form-check-input bg-dark"
-          >
-          <label for="goldCleat" class="form-check-label">
-            Four tickets with Gold Cleats
-          </label>
-        </div>
-        <div class="form-check">
-          <input
-            type="checkbox"
-            id="silverCleat"
-            name="silverCleat"
-            class="form-check-input bg-dark"
-          >
-          <label for="silverCleat" class="form-check-label">
-            Four tickets with Silver Cleats
-          </label>
-        </div>
-      </div>
-    </fieldset>
+    </div>
   </form>
 </section>
 

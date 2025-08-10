@@ -7,10 +7,12 @@ const getIndexPage = (req, res) => {
 };
 
 const validationRules = [
-  body('carats').isInt({ min: 0, max: 9999999999999 }),
+  body('carats').toInt().isInt({ min: 0, max: 9999999999999 }),
   body('clubRank').isIn(['SS', 'Splus', 'S', 'Aplus', 'A', 'Bplus', 'B', 'Cplus', 'C', 'Dplus']),
   body('teamTrialsRank').isIn(['Class6', 'Class5', 'Class4', 'Class3', 'Class2', 'Class1']),
   body('champMeeting').isIn([1000, 1200, 1800, 2500]),
+  body('characterTickets').toInt().isInt({ min: 0, max: 9999}),
+  body('supportTickets').toInt().isInt({ min: 0, max: 9999}),
   body('monthlyPass').toBoolean(),
   body('dailyLogin').toBoolean(),
   body('legendRace').toBoolean(),
@@ -31,14 +33,15 @@ const handleValidationErrors = (req, res) => {
 
 const extractRequestData = (req) => {
   const {
-    carats, clubRank, teamTrialsRank, champMeeting, monthlyPass, dailyLogin,
-    legendRace, dailyMission, rainbowCleat, goldCleat, silverCleat,
-    characterBanner, supportBanner
+    carats, clubRank, teamTrialsRank, champMeeting, characterTickets,
+    supportTickets, monthlyPass, dailyLogin, legendRace, dailyMission,
+    rainbowCleat, goldCleat, silverCleat, characterBanner, supportBanner
   } = req.body;
 
   return {
-    carats, clubRank, teamTrialsRank, champMeeting, monthlyPass, dailyLogin,
-    legendRace, dailyMission, rainbowCleat, goldCleat, silverCleat,
+    carats, clubRank, teamTrialsRank, champMeeting, characterTickets,
+    supportTickets, monthlyPass, dailyLogin, legendRace, dailyMission,
+    rainbowCleat, goldCleat, silverCleat,
     bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
   };
 };
