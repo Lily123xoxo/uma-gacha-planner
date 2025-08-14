@@ -1,9 +1,10 @@
 <!-- Full-width section for the form -->
 <section class="form-container container-fluid">
   <form id="planner-form" class="form-wrapper card rounded p-4">
-    <div class="row g-4">
-      <!-- Current Stockpiles (spans both rows) -->
-      <div class="col-md-3 d-flex flex-column">
+    <div class="row g-4 align-items-start">
+      
+      <!-- Current Stockpiles (Warchest) -->
+      <div class="col-12 col-lg-4 d-flex flex-column">
         <section class="stockpile-card flex-grow-1">
           <h2 class="h2-form-titles mb-3">My Warchest</h2>
 
@@ -20,7 +21,7 @@
 
           <!-- Tickets -->
           <div class="row g-2 mb-3">
-            <div class="col-sm-6 d-flex flex-column">
+            <div class="col-12 col-sm-6 d-flex flex-column">
               <label for="characterTickets" class="form-label-tickets">Uma tickets</label>
               <input
                 type="number"
@@ -32,7 +33,7 @@
                 class="form-control text-light ticket-input"
               >
             </div>
-            <div class="col-sm-6 d-flex flex-column">
+            <div class="col-12 col-sm-6 d-flex flex-column">
               <label for="supportTickets" class="form-label-tickets">Support tickets</label>
               <input
                 type="number"
@@ -49,10 +50,11 @@
       </div>
 
       <!-- Right-hand side content -->
-      <div class="col-md-7">
+      <div class="col-12 col-lg">
+        
         <!-- Row 1: dropdowns -->
-        <div class="row g-4 mb-4 selectors-row">
-          <div class="col-md-4">
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4 selectors-row">
+          <div class="col dropdown-box">
             <label for="clubRank" class="form-label">Club Rank</label>
             <select id="clubRank" name="clubRank" required class="form-select">
               <option value="" disabled selected>Select a value</option>
@@ -69,7 +71,7 @@
             </select>
           </div>
 
-          <div class="col-md-4">
+          <div class="col dropdown-box">
             <label for="teamTrialsRank" class="form-label">Team Trials Class</label>
             <select id="teamTrialsRank" name="teamTrialsRank" required class="form-select">
               <option value="" disabled selected>Select a value</option>
@@ -82,8 +84,8 @@
             </select>
           </div>
 
-          <div class="col-md-4">
-            <label for="champMeeting" class="form-label">Champions Meeting Gains</label>
+          <div class="col dropdown-box">
+            <label for="champMeeting" class="form-label">Champions Meeting</label>
             <select id="champMeeting" name="champMeeting" required class="form-select">
               <option value="" disabled selected>Select a value</option>
               <option value="2500">2500</option>
@@ -96,7 +98,7 @@
 
         <!-- Row 2: Bonus Income + Monthly Purchases -->
         <div class="row g-4 booleans-row">
-          <div class="col-md-4">
+          <div class="col-12 col-sm-5 col-lg-5">
             <h2 class="h2-form-titles">Bonus Income</h2>
             <div class="form-check">
               <input type="checkbox" id="dailyLogin" name="dailyLogin" class="form-check-input bg-dark">
@@ -112,7 +114,7 @@
             </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-12 col-sm-7 col-lg">
             <h2 class="h2-form-titles">Monthly Purchases</h2>
             <div class="form-check">
               <input type="checkbox" id="monthlyPass" name="monthlyPass" class="form-check-input bg-dark">

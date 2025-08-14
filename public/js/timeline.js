@@ -254,12 +254,10 @@ async function loadTimeline() {
       const supportBanner = supports[i];
 
       const startDateRaw = charBanner.global_actual_date || charBanner.global_est_date;
-      const endDateObj   = addDays(startDateRaw, 11);
+      const endDateRaw   = charBanner.global_actual_end_date || charBanner.global_est_end_date;
 
-      const startDate = formatLocalDate(startDateRaw);
-      const endDate   = endDateObj
-        ? endDateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-        : 'Unknown';
+      const startDate = startDateRaw ? formatLocalDate(startDateRaw) : 'Unknown';
+      const endDate   = endDateRaw   ? formatLocalDate(endDateRaw)   : 'Unknown';
 
       const cardWrapper = buildCard(i, charBanner, supportBanner, startDate, endDate, placeholder);
 

@@ -42,7 +42,7 @@ const extractRequestData = (req) => {
     carats, clubRank, teamTrialsRank, champMeeting, characterTickets,
     supportTickets, monthlyPass, dailyLogin, legendRace, dailyMission,
     rainbowCleat, goldCleat, silverCleat,
-    bannerStartDate: characterBanner?.global_actual_date || characterBanner?.global_est_date
+    bannerStartDate: characterBanner?.global_actual_end_date || characterBanner?.global_est_end_date
   };
 };
 
