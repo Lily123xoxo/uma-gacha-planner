@@ -35,7 +35,8 @@ function safeLimit(n: unknown, fallback = 90, max = 200) {
 
 export async function getCharacterBanners(limit: unknown = 90): Promise<CharacterRow[]> {
   const lim = safeLimit(limit);
-  const query = `
+
+  const rows = await sql/* sql */`
     SELECT
       id,
       uma_name,
@@ -53,14 +54,16 @@ export async function getCharacterBanners(limit: unknown = 90): Promise<Characte
       OR
       (global_est_end_date IS NOT NULL AND global_est_end_date >= CURRENT_DATE)
     ORDER BY COALESCE(global_actual_date, global_est_date)
-    LIMIT $1
+    LIMIT ${lim}
   `;
-  return sql<CharacterRow[]>(query, [lim]);
+
+  return rows as CharacterRow[];
 }
 
 export async function getSupportBanners(limit: unknown = 90): Promise<SupportRow[]> {
   const lim = safeLimit(limit);
-  const query = `
+
+  const rows = await sql/* sql */`
     SELECT
       id,
       support_name,
@@ -78,7 +81,8 @@ export async function getSupportBanners(limit: unknown = 90): Promise<SupportRow
       OR
       (global_est_end_date IS NOT NULL AND global_est_end_date >= CURRENT_DATE)
     ORDER BY COALESCE(global_actual_date, global_est_date)
-    LIMIT $1
+    LIMIT ${lim}
   `;
-  return sql<SupportRow[]>(query, [lim]);
+
+  return rows as SupportRow[];
 }
