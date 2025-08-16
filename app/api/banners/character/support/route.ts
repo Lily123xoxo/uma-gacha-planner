@@ -1,27 +1,10 @@
 import { NextResponse } from 'next/server';
 import { resolveImagePath } from '@/lib/paths';
-// import { getSupportBanners } from '@/lib/bannerDao';
-
-type SupportRow = {
-  id: number;
-  support_name: string;
-  jp_release_date: string | null;
-  global_actual_date: string | null;
-  global_est_date: string | null;
-  jp_days_until_next: number | null;
-  global_days_until_next: number | null;
-  image_path: string | null;
-};
-
-// TEMP: stub until your DAO is wired
-async function getSupportBanners(): Promise<SupportRow[]> {
-  // Replace with DB/JSON call. Must return the same fields as above.
-  return [];
-}
+import { getSupportBanners, type SupportRow } from '@/lib/bannerDao';
 
 export async function GET() {
   try {
-    const rows = await getSupportBanners();
+    const rows: SupportRow[] = await getSupportBanners();
 
     const withResolved = await Promise.all(
       rows.map(async (row) => ({

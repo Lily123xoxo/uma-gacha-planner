@@ -12,5 +12,3 @@ const pool = mysql.createPool({
 });
 
 module.exports = pool;
-
-/* export EVERYTHING to .env */
