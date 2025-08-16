@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: 'umaplanner',
@@ -20,8 +21,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
 
-        {/* Vercel Analytics */}
+        {/* Vercel Analytics and Speed Insights */}
         <Analytics />
+        <SpeedInsights />
 
         {/* Bootstrap JS */}
         <Script
