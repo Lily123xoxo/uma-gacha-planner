@@ -31,10 +31,10 @@ export async function GET(req: Request) {
     });
 
     // Long edge cache, manual invalidation strategy
-    const ONE_YEAR = 60 * 60 * 24 * 365;
+    const ONE_MONTH = 60 * 60 * 24 * 24;
     res.headers.set(
       'Cache-Control',
-      `public, s-maxage=${ONE_YEAR}, stale-while-revalidate=${ONE_YEAR}`
+      `public, s-maxage=${ONE_MONTH}, stale-while-revalidate=${ONE_MONTH}`
     );
     return res;
   } catch (err) {
