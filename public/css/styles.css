@@ -45,21 +45,9 @@ body {
 /* Header CSS */
 
 .banner-title {
-  background: linear-gradient(
-    to right,
-    var(--primary-site-color) 15%,
-    var(--tertiary-site-color) 70%,
-    var(--secondary-site-color) 95%
-  );
   font-weight: bold;
   position: relative;
   top: 0.13rem;
-
-  -webkit-background-clip: text;
-  background-clip: text;
-
-  -webkit-text-fill-color: transparent;
-  color: transparent;
 }
 
 .site-header {
@@ -74,23 +62,19 @@ body {
   padding: 0;
 }
 
-.site-title {
+.gradient-text {
   background: linear-gradient(
     to right,
     var(--primary-site-color) 0%,
-    var(--tertiary-site-color) 13%,
-    var(--secondary-site-color) 17%
+    var(--tertiary-site-color) 75%,
+    var(--secondary-site-color) 85%
   );
-  font-size: clamp(1.5rem, 2vw + 1rem, 2.5rem);
+
   font-weight: bold;
   letter-spacing: 1px;
-  margin: 0;
 
   -webkit-background-clip: text;
   background-clip: text;
-  background-position: center;
-  background-size: 100%;
-
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
@@ -490,6 +474,7 @@ body {
   .booleans-row > .col-sm-5 {
     flex: 0 0 33%; max-width: 33%;
   }
+
   .booleans-row > .col-sm-7 {
     flex: 0 0 67%; max-width: 67%;
   }
