@@ -172,6 +172,22 @@ body {
   font-weight: var(--font-semibold);
 }
 
+.warchest {
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--white-text-color);
+  padding-left: 0.75rem;
+  border-left: 4px solid #f5e88b;
+  opacity: 0.95;
+}
+
+.warchest:hover {
+  border-left-color: var(--secondary-site-color); /* shifts to pink */
+  transition: border-color 0.25s ease;
+}
+
+
 #results {
   display: inline-flex;
   flex-wrap: wrap;

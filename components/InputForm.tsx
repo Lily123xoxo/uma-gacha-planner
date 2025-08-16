@@ -11,7 +11,7 @@ export default function InputForm() {
             {/* Current Stockpiles (Warchest) */}
             <div className="col-12 col-lg-4 d-flex flex-column">
               <section className="stockpile-card flex-grow-1">
-                <h2 className="h2-form-titles mb-3">My Warchest</h2>
+                <h2 className="h2-form-titles mb-3 warchest">Warchest</h2>
 
                 {/* Current Carats */}
                 <label htmlFor="carats" className="form-label-carats carats-label text-end">Carats</label>
