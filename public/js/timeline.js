@@ -220,14 +220,9 @@ async function loadTimeline() {
   if (!container) return;
 
   try {
-    const [charRes, supportRes] = await Promise.all([
-      
-      fetch('/api/banners/character', { credentials: 'same-origin' }),
-      fetch('/api/banners/support',   { credentials: 'same-origin' })
-    ]);
-
-    const characters = await charRes.json();
-    const supports   = await supportRes.json();
+    const qs = new URLSearchParams({ limit: '90' });
+    const res = await fetch(`/api/banners?${qs.toString()}`, { credentials: 'same-origin' });
+    const { characters, supports } = await res.json();
 
     container.textContent = '';
 

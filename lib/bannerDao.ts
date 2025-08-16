@@ -221,3 +221,79 @@ export async function getSupportBanners(
     return ensureSupportRows(normalizeRows(res));
   });
 }
+
+/* -----------------------------
+   Combined banners (one key)
+------------------------------*/
+
+export type BannersPayload = {
+  characters: CharacterRow[];
+  supports: SupportRow[];
+};
+
+export async function getBannersCombined(
+  limit: number = 90
+): Promise<BannersPayload> {
+  const lim = safeLimit(limit);
+  const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:banners_combined:lim=${lim}`;
+
+  return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
+    const [charRes, supRes] = await Promise.all([
+      sql/* sql */`
+        SELECT
+          id,
+          uma_name,
+          jp_release_date,
+          global_actual_date,
+          global_actual_end_date,
+          global_est_date,
+          global_est_end_date,
+          jp_days_until_next,
+          global_days_until_next,
+          image_path
+        FROM character_banner
+        WHERE
+          (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
+            AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
+          )
+          OR (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NULL
+            AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
+          )
+        ORDER BY COALESCE(global_actual_date, global_est_date), id
+        LIMIT ${lim} OFFSET 0
+      `,
+      sql/* sql */`
+        SELECT
+          id,
+          support_name,
+          jp_release_date,
+          global_actual_date,
+          global_actual_end_date,
+          global_est_date,
+          global_est_end_date,
+          jp_days_until_next,
+          global_days_until_next,
+          image_path
+        FROM support_banner
+        WHERE
+          (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
+            AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
+          )
+          OR (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NULL
+            AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
+          )
+        ORDER BY COALESCE(global_actual_date, global_est_date), id
+        LIMIT ${lim} OFFSET 0
+      `,
+    ]);
+
+    const characters = ensureCharacterRows(normalizeRows(charRes));
+    const supports = ensureSupportRows(normalizeRows(supRes));
+
+    return { characters, supports };
+  });
+}
