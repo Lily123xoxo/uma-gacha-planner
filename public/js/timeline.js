@@ -245,9 +245,7 @@ async function loadTimeline() {
       }
     }, { root: container, rootMargin: '300px 0px', threshold: 0.01 });
 
-    const placeholder =
-      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAyBCAYAAABQnqM/AAAAJ0lEQVR4nO3BMQEAAAwCoNm/9HI8gAAAAAAAAAAAAAAAAAAAAAAAAAAAPgNjmIAAQAPXwAAAABJRU5ErkJggg==";
-
+    const placeholder = "/images/placeholder.png";
 
     for (let i = 0; i < len; i++) {
       const charBanner    = characters[i];
