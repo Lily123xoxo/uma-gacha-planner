@@ -1,8 +1,5 @@
 // app/api/planner/route.ts
 import { NextResponse } from 'next/server';
-// Adjust import based on your actual export:
-// If it's a default export object with calculateRolls(), keep as below.
-// If it's a named export, use: import { calculateRolls } from '@/services/gachaService';
 import gachaService from '@/services/gachaService';
 
 type PlannerRequest = {
@@ -49,8 +46,6 @@ export async function POST(req: Request) {
         null,
     };
 
-    // If your service exports a named function, do:
-    // const result = calculateRolls(data);
     const result = gachaService.calculateRolls(data);
 
     return NextResponse.json({

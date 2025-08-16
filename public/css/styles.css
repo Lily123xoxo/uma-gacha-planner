@@ -376,6 +376,8 @@ body {
   }
 }
 
+/* Media Queries */
+
 /* Adjust styles for different screen sizes */
 
 @media (max-width: 575.98px) {

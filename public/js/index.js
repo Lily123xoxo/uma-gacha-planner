@@ -1,67 +1,93 @@
-window.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('planner-form');
-
-  // Load from localstorage
-  const saved = localStorage.getItem('plannerSelections');
-  if (saved) {
-    const data = JSON.parse(saved);
-
-    document.getElementById('carats').value = data.carats || '';
-    document.getElementById('clubRank').value = data.clubRank || '';
-    document.getElementById('teamTrialsRank').value = data.teamTrialsRank || '';
-    document.getElementById('champMeeting').value = data.champMeeting || '';
-    document.getElementById('characterTickets').value = data.characterTickets || '';
-    document.getElementById('supportTickets').value = data.supportTickets || '';
-    document.getElementById('monthlyPass').checked = data.monthlyPass || false;
-    document.getElementById('dailyLogin').checked = data.dailyLogin || false;
-    document.getElementById('legendRace').checked = data.legendRace || false;
-    document.getElementById('dailyMission').checked = data.dailyMission || false;
-    document.getElementById('rainbowCleat').checked = data.rainbowCleat || false;
-    document.getElementById('goldCleat').checked = data.goldCleat || false;
-    document.getElementById('silverCleat').checked = data.silverCleat || false;
+(function () {
+  function safeParse(json) {
+    try { return JSON.parse(json); } catch { return null; }
   }
 
-  // Auto-save when form fields change
-  form.addEventListener('input', () => savePlannerSelections());
-  form.addEventListener('change', () => savePlannerSelections());
-  form.addEventListener('submit', async (e) => {
+  function loadSaved() {
+    const savedRaw = localStorage.getItem('plannerSelections');
+    const saved = safeParse(savedRaw) || {};
+
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+    const setNum = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v ?? '') === '' ? '' : Number(v); };
+    const setChk = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+
+    setNum('carats', saved.carats);
+    setVal('clubRank', saved.clubRank);
+    setVal('teamTrialsRank', saved.teamTrialsRank);
+    setVal('champMeeting', saved.champMeeting);
+    setNum('characterTickets', saved.characterTickets);
+    setNum('supportTickets', saved.supportTickets);
+
+    setChk('monthlyPass', saved.monthlyPass);
+    setChk('dailyLogin', saved.dailyLogin);
+    setChk('legendRace', saved.legendRace);
+    setChk('dailyMission', saved.dailyMission);
+    setChk('rainbowCleat', saved.rainbowCleat);
+    setChk('goldCleat', saved.goldCleat);
+    setChk('silverCleat', saved.silverCleat);
+  }
+
+  function getPlannerSelections() {
+    const prev = safeParse(localStorage.getItem('plannerSelections')) || {};
+    const byId = (id) => document.getElementById(id);
+
+    return {
+      carats: Number(byId('carats')?.value || 0),
+      clubRank: byId('clubRank')?.value || '',
+      teamTrialsRank: byId('teamTrialsRank')?.value || '',
+      champMeeting: Number(byId('champMeeting')?.value || 0),
+      characterTickets: Number(byId('characterTickets')?.value || 0),
+      supportTickets: Number(byId('supportTickets')?.value || 0),
+      monthlyPass: !!byId('monthlyPass')?.checked,
+      dailyLogin: !!byId('dailyLogin')?.checked,
+      legendRace: !!byId('legendRace')?.checked,
+      dailyMission: !!byId('dailyMission')?.checked,
+      rainbowCleat: !!byId('rainbowCleat')?.checked,
+      goldCleat: !!byId('goldCleat')?.checked,
+      silverCleat: !!byId('silverCleat')?.checked,
+      characterBanner: prev.characterBanner || null,
+      supportBanner: prev.supportBanner || null,
+    };
+  }
+
+  function savePlannerSelections() {
+    localStorage.setItem('plannerSelections', JSON.stringify(getPlannerSelections()));
+  }
+
+  async function onSubmit(e) {
     e.preventDefault();
     const formData = getPlannerSelections();
     localStorage.setItem('plannerSelections', JSON.stringify(formData));
 
-    const response = await fetch('/calculate', {
+    const response = await fetch('/api/planner', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData),
     });
 
     const result = await response.json();
-    document.getElementById('result').textContent =
-      `You will have ${result.rolls} rolls by this banner and ${result.carats} carats.`;
-  });
-});
+    const resultEl = document.getElementById('result');
+    if (resultEl) {
+      resultEl.textContent =
+        `You will have ${result.rolls} rolls by this banner and ${result.carats} carats.`;
+    }
+  }
 
-function getPlannerSelections() {
-  return {
-    carats: Number(document.getElementById('carats').value),
-    clubRank: document.getElementById('clubRank').value,
-    teamTrialsRank: document.getElementById('teamTrialsRank').value,
-    champMeeting: Number(document.getElementById('champMeeting').value),
-    characterTickets: Number(document.getElementById('characterTickets').value),
-    supportTickets: Number(document.getElementById('supportTickets').value),
-    monthlyPass: document.getElementById('monthlyPass').checked,
-    dailyLogin: document.getElementById('dailyLogin').checked,
-    legendRace: document.getElementById('legendRace').checked,
-    dailyMission: document.getElementById('dailyMission').checked,
-    rainbowCleat: document.getElementById('rainbowCleat').checked,
-    goldCleat: document.getElementById('goldCleat').checked,
-    silverCleat: document.getElementById('silverCleat').checked,
-    characterBanner: JSON.parse(localStorage.getItem('plannerSelections'))?.characterBanner || null,
-    supportBanner: JSON.parse(localStorage.getItem('plannerSelections'))?.supportBanner || null
-  };
-}
+  function init() {
+    const form = document.getElementById('planner-form');
+    if (!form) return;
 
-function savePlannerSelections() {
-  const current = getPlannerSelections();
-  localStorage.setItem('plannerSelections', JSON.stringify(current));
-}
+    loadSaved();
+
+    form.addEventListener('input', savePlannerSelections);
+    form.addEventListener('change', savePlannerSelections);
+    form.addEventListener('submit', onSubmit);
+  }
+
+  // Ensure init runs whether the script loads before or after DOMContentLoaded
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

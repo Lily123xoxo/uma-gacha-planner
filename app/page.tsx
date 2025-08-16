@@ -3,7 +3,6 @@ import InputForm from "../components/InputForm";
 import Timeline from "../components/Timeline";
 import type { Metadata } from "next";
 
-// App Router metadata replaces <Head>
 export const metadata: Metadata = {
   title: "umaplanner",
   description:

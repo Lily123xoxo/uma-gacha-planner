@@ -1,3 +1,5 @@
+// public/js/timeline.js
+
 // ---------- utils ----------
 function debounce(fn, delay) {
   let timeout;
@@ -144,7 +146,7 @@ function triggerCalculate(characterBanner, supportBanner) {
     supportBanner
   };
 
-  fetch('/calculate', {
+  fetch('/api/planner', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'same-origin',
@@ -219,8 +221,9 @@ async function loadTimeline() {
 
   try {
     const [charRes, supportRes] = await Promise.all([
-      fetch('/banners/api/character-banners', { credentials: 'same-origin' }),
-      fetch('/banners/api/support-banners',   { credentials: 'same-origin' })
+      
+      fetch('/api/banners/character', { credentials: 'same-origin' }),
+      fetch('/api/banners/support',   { credentials: 'same-origin' })
     ]);
 
     const characters = await charRes.json();
@@ -305,7 +308,7 @@ async function loadTimeline() {
 }
 
 // ---------- boot ----------
-document.addEventListener('DOMContentLoaded', async () => {
+async function initTimeline() {
   await loadTimeline();
 
   // search wiring
@@ -327,4 +330,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const container = document.querySelector('.timeline-scroll');
   if (container) enableDragScroll(container);
-});
+}
+
+// Run now if DOM is ready; otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTimeline, { once: true });
+} else {
+  initTimeline();
+}

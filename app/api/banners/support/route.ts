@@ -1,7 +1,7 @@
 export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
-import { getCharacterBanners, safeLimit } from '@/lib/bannerDao';
+import { getSupportBanners, safeLimit } from '@/lib/bannerDao';
 import { resolveImagePath } from '@/lib/paths';
 
 export async function GET(req: Request) {
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
     const raw = searchParams.get('limit');
     const limit = safeLimit(raw); // defaults to 90 if missing/invalid
 
-    const rows = await getCharacterBanners(limit);
+    const rows = await getSupportBanners(limit);
 
     const withResolved = await Promise.all(
       rows.map(async (row) => ({
@@ -24,11 +24,11 @@ export async function GET(req: Request) {
     const TWO_WEEKS = 60 * 60 * 24 * 14;
     res.headers.set(
       'Cache-Control',
-      `public, s-maxage=${TWO_WEEKS}, stale-while-revalidate=${ONE_YEAR}`
+      `public, s-maxage=${ONE_YEAR}, stale-while-revalidate=${ONE_YEAR}`
     );
     return res;
   } catch (err) {
-    console.error('Error fetching character banners:', err);
-    return NextResponse.json({ error: 'Failed to fetch character banners' }, { status: 500 });
+    console.error('Error fetching support banners:', err);
+    return NextResponse.json({ error: 'Failed to fetch support banners' }, { status: 500 });
   }
 }
