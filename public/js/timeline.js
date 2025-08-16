@@ -220,8 +220,8 @@ async function loadTimeline() {
   if (!container) return;
 
   try {
-    const qs = new URLSearchParams({ limit: '90' });
-    const res = await fetch(`/api/banners?${qs.toString()}`, { credentials: 'same-origin' });
+
+    const res = await fetch(`/api/banners`, { credentials: 'same-origin' });
     const { characters, supports } = await res.json();
 
     container.textContent = '';
@@ -245,7 +245,7 @@ async function loadTimeline() {
       }
     }, { root: container, rootMargin: '300px 0px', threshold: 0.01 });
 
-    const placeholder = '/images/default.png';
+    const placeholder = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; // 1x1 transparent gif
 
     for (let i = 0; i < len; i++) {
       const charBanner    = characters[i];

@@ -28,10 +28,18 @@ export type SupportRow = {
   image_path: string | null;
 };
 
-export function safeLimit(n: unknown, fallback = 90, max = 200): number {
-  const parsed = Number.parseInt(String(n ?? ""), 10);
-  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
-  return Math.min(parsed, max);
+/**
+ * Single source of truth for limit when reading from database.
+ * Reads from server env BANNERS_LIMIT (optional), falls back to 61, caps at 200.
+ * No caller can influence the limit.
+ */
+export function safeLimit(): number {
+  const fallback = 61;
+  const max = 200;
+  const raw = process.env.BANNERS_LIMIT;
+  const parsed = Number.parseInt(String(raw ?? ""), 10);
+  const n = Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  return Math.min(n, max);
 }
 
 /** Normalize sql() results: supports Neon (array) and pg Pool ({ rows }) */
@@ -146,10 +154,9 @@ const MONTH_TTL_SECONDS = 30 * 24 * 60 * 60;
 const CACHE_PREFIX = process.env.CACHE_PREFIX ?? "dev";
 const CACHE_VERSION = process.env.CACHE_VERSION ?? "v1";
 
-export async function getCharacterBanners(
-  limit: number = 90
-): Promise<CharacterRow[]> {
-  const lim = safeLimit(limit);
+/* -------- character banners (no args) -------- */
+export async function getCharacterBanners(): Promise<CharacterRow[]> {
+  const lim = safeLimit();
   const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:character_banners:lim=${lim}`;
 
   return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
@@ -184,10 +191,9 @@ export async function getCharacterBanners(
   });
 }
 
-export async function getSupportBanners(
-  limit: number = 90
-): Promise<SupportRow[]> {
-  const lim = safeLimit(limit);
+/* -------- support banners (no args) -------- */
+export async function getSupportBanners(): Promise<SupportRow[]> {
+  const lim = safeLimit();
   const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:support_banners:lim=${lim}`;
 
   return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
@@ -222,19 +228,14 @@ export async function getSupportBanners(
   });
 }
 
-/* -----------------------------
-   Combined banners (one key)
-------------------------------*/
-
+/* -------- combined (no args) -------- */
 export type BannersPayload = {
   characters: CharacterRow[];
   supports: SupportRow[];
 };
 
-export async function getBannersCombined(
-  limit: number = 90
-): Promise<BannersPayload> {
-  const lim = safeLimit(limit);
+export async function getBannersCombined(): Promise<BannersPayload> {
+  const lim = safeLimit();
   const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:banners_combined:lim=${lim}`;
 
   return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
@@ -293,7 +294,6 @@ export async function getBannersCombined(
 
     const characters = ensureCharacterRows(normalizeRows(charRes));
     const supports = ensureSupportRows(normalizeRows(supRes));
-
     return { characters, supports };
   });
 }

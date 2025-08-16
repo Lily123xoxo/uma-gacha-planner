@@ -7,9 +7,7 @@ import { resolveImagePath } from '@/lib/paths';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const limit = safeLimit(searchParams.get('limit'));
-
-    const { characters, supports } = await getBannersCombined(limit);
+    const { characters, supports } = await getBannersCombined();
 
     // Resolve image paths for both lists
     const [charactersResolved, supportsResolved] = await Promise.all([
