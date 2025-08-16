@@ -245,7 +245,9 @@ async function loadTimeline() {
       }
     }, { root: container, rootMargin: '300px 0px', threshold: 0.01 });
 
-    const placeholder = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; // 1x1 transparent gif
+    const placeholder =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAyBCAYAAABQnqM/AAAAJ0lEQVR4nO3BMQEAAAwCoNm/9HI8gAAAAAAAAAAAAAAAAAAAAAAAAAAAPgNjmIAAQAPXwAAAABJRU5ErkJggg==";
+
 
     for (let i = 0; i < len; i++) {
       const charBanner    = characters[i];

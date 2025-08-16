@@ -1,14 +1,25 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'umaplanner',
   description: 'Gacha planner & banner timeline for Uma Musume.',
-  viewport: { width: 'device-width', initialScale: 1 },
-  // icons: { icon: '/favicon.ico' }, // uncomment when favicon added
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     : undefined;
 
   return (
-    <html lang="en" data-bs-theme="dark" /* suppressHydrationWarning */>
+    <html lang="en" data-bs-theme="dark">
       <body>
         {children}
 

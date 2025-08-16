@@ -127,16 +127,16 @@ export default function InputForm() {
                     <label htmlFor="monthlyPass" className="form-check-label">Daily Carat Pack</label>
                   </div>
                   <div className="form-check">
-                    <input type="checkbox" id="rainbowCleat" name="rainbowCleat" className="form-check-input bg-dark" />
-                    <label htmlFor="rainbowCleat" className="form-check-label">Rainbow Cleats tickets</label>
+                    <input type="checkbox" id="silverCleat" name="silverCleat" className="form-check-input bg-dark" />
+                    <label htmlFor="silverCleat" className="form-check-label">Silver Cleats tickets</label>
                   </div>
                   <div className="form-check">
                     <input type="checkbox" id="goldCleat" name="goldCleat" className="form-check-input bg-dark" />
                     <label htmlFor="goldCleat" className="form-check-label">Gold Cleats tickets</label>
                   </div>
                   <div className="form-check">
-                    <input type="checkbox" id="silverCleat" name="silverCleat" className="form-check-input bg-dark" />
-                    <label htmlFor="silverCleat" className="form-check-label">Silver Cleats tickets</label>
+                    <input type="checkbox" id="rainbowCleat" name="rainbowCleat" className="form-check-input bg-dark" />
+                    <label htmlFor="rainbowCleat" className="form-check-label">Rainbow Cleats tickets</label>
                   </div>
                 </div>
               </div>
