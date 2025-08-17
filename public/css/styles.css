@@ -21,6 +21,7 @@
   --font-size-large: 1.2rem;
   --font-size-normal: 1rem;
   --font-size-small: 0.8rem;
+  --font-size-smlmed: 0.95rem;
   --font-size-x-large: 1.25rem;
   --font-size-x-small: 0.7rem;
   --font-size-xx-large: 1.3rem;
@@ -157,6 +158,12 @@ body {
   font-weight: var(--font-semibold);
 }
 
+.instructions {
+  margin-top: var(--vertical-section-spacing);
+  color: var(--white-text-color);
+  font-size: var(--font-size-smlmed);
+}
+
 .warchest {
   font-size: 1.9rem;
   font-weight: 600;
@@ -275,7 +282,7 @@ body {
 }
 
 .timeline-card .card {
-  background-color: #26202e;
+  background-color: #2e2b38;
   border: 2.5px solid var(--white-text-color);
   border-radius: 0.75rem;
   display: flex;
