@@ -1,13 +1,13 @@
 export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
-import { getBannersCombined, safeLimit } from '@/lib/bannerDao';
+import { getBannerDispatcher } from '@/lib/bannerDaoDispatcher';
 import { resolveImagePath } from '@/lib/paths';
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const { characters, supports } = await getBannersCombined();
+    const { characters, supports } = await getBannerDispatcher();
 
     // Resolve image paths for both lists
     const [charactersResolved, supportsResolved] = await Promise.all([

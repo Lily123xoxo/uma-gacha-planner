@@ -29,7 +29,7 @@ import {
   getSupportBanners,
   type CharacterRow,
   type SupportRow,
-} from "../lib/bannerDao";
+} from "../lib/bannerDaoDispatcher";
 
 const characterRows: CharacterRow[] = [
   {

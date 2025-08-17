@@ -1,8 +1,8 @@
-// /lib/bannerDao.ts
+// lib/bannerDao.prod.ts
 import { sql } from "./db";
 import { Redis } from "@upstash/redis";
-import { isDevApp } from "./env";
 
+/* ---------- types ---------- */
 export type CharacterRow = {
   id: number;
   uma_name: string;
@@ -29,11 +29,17 @@ export type SupportRow = {
   image_path: string | null;
 };
 
-/**
- * Single source of truth for limit when reading from database.
- * Reads from server env BANNERS_LIMIT (optional), falls back to 61, caps at 200.
- * No caller can influence the limit.
- */
+export type BannersPayload = {
+  characters: CharacterRow[];
+  supports: SupportRow[];
+};
+
+/* ---------- config ---------- */
+const MONTH_TTL_SECONDS = 30 * 24 * 60 * 60;
+const CACHE_PREFIX = process.env.CACHE_PREFIX ?? "prod";
+const CACHE_VERSION = process.env.CACHE_VERSION ?? "v2";
+
+/** Single source of truth for DB read limit */
 export function safeLimit(): number {
   const fallback = 61;
   const max = 200;
@@ -43,6 +49,7 @@ export function safeLimit(): number {
   return Math.min(n, max);
 }
 
+/* ---------- helpers ---------- */
 /** Normalize sql() results: supports Neon (array) and pg Pool ({ rows }) */
 function normalizeRows<T = any>(res: unknown): T[] {
   if (Array.isArray(res)) return res as T[];
@@ -52,7 +59,6 @@ function normalizeRows<T = any>(res: unknown): T[] {
   return [];
 }
 
-// --- coercion helpers ---
 function toNullableString(v: unknown): string | null {
   if (v === null || v === undefined) return null;
   const s = String(v);
@@ -64,11 +70,10 @@ function toNullableNumber(v: unknown): number | null {
 }
 function toRequiredNumber(v: unknown, field: string): number {
   const n = Number(v);
-  if (!Number.isFinite(n)) throw new Error(`[bannerDao] Expected number for ${field}, got ${v}`);
+  if (!Number.isFinite(n)) throw new Error(`[bannerDao.prod] Expected number for ${field}, got ${v}`);
   return n;
 }
 
-// --- validators / normalizers ---
 function ensureCharacterRows(rows: any[]): CharacterRow[] {
   return rows.map((r, i) => {
     try {
@@ -85,7 +90,7 @@ function ensureCharacterRows(rows: any[]): CharacterRow[] {
         image_path: toNullableString(r.image_path),
       };
     } catch (e) {
-      throw new Error(`[bannerDao] Row ${i} invalid (character): ${(e as Error).message}`);
+      throw new Error(`[bannerDao.prod] Row ${i} invalid (character): ${(e as Error).message}`);
     }
   });
 }
@@ -106,12 +111,12 @@ function ensureSupportRows(rows: any[]): SupportRow[] {
         image_path: toNullableString(r.image_path),
       };
     } catch (e) {
-      throw new Error(`[bannerDao] Row ${i} invalid (support): ${(e as Error).message}`);
+      throw new Error(`[bannerDao.prod] Row ${i} invalid (support): ${(e as Error).message}`);
     }
   });
 }
 
-// Redis first, Neon fallback
+/* ---------- cache (Upstash optional) ---------- */
 const hasRedis =
   !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -127,24 +132,20 @@ async function cacheJSON<T>(
   ttlSeconds: number,
   loader: () => Promise<T>
 ): Promise<T> {
-  if (!redis) {
-    console.log(`[bannerDao] cache disabled → DB for ${key}`);
-    return loader();
-  }
+  if (!redis) return loader();
 
   try {
     const cached = await redis.get<T>(key);
     if (cached) return cached;
   } catch {
-    // ignore and fall through
+    // ignore get failures
   }
 
-  console.log(`[bannerDao] cache MISS → DB for ${key}`);
   const fresh = await loader();
 
   try {
-    // never overwrite an existing key
-    await redis.set(key, fresh as any, { ex: ttlSeconds, nx: true });
+    // write/refresh the cache (no NX so content can update under same key)
+    await redis.set(key, fresh as any, { ex: ttlSeconds });
   } catch {
     // ignore set failures
   }
@@ -152,165 +153,65 @@ async function cacheJSON<T>(
   return fresh;
 }
 
-const MONTH_TTL_SECONDS = 30 * 24 * 60 * 60;
-const CACHE_PREFIX = process.env.CACHE_PREFIX ?? "dev";
-const CACHE_VERSION = process.env.CACHE_VERSION ?? "v1";
-
-/* -------- character banners (no args) -------- */
-/*
-export async function getCharacterBanners(): Promise<CharacterRow[]> {
-  const lim = safeLimit();
-  const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:character_banners:lim=${lim}`;
-
-  return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
-    const res = await sql */ /* sql */
-    /* `
-      SELECT
-        id,
-        uma_name,
-        jp_release_date,
-        global_actual_date,
-        global_actual_end_date,
-        global_est_date,
-        global_est_end_date,
-        jp_days_until_next,
-        global_days_until_next,
-        image_path
-      FROM character_banner
-      WHERE
-        (
-          COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
-          AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
-        )
-        OR (
-          COALESCE(global_actual_end_date, global_est_end_date) IS NULL
-          AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
-        )
-      ORDER BY
-        COALESCE(global_actual_date, global_est_date),
-        id
-      LIMIT ${lim} OFFSET 0
-    `;
-    return ensureCharacterRows(normalizeRows(res));
-  });
-}
-*/
-
-/* -------- support banners (no args) -------- */
-/*
-export async function getSupportBanners(): Promise<SupportRow[]> {
-  const lim = safeLimit();
-  const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:support_banners:lim=${lim}`;
-
-  return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
-    const res = await sql */ /* sql */
-    
-    /* `
-      SELECT
-        id,
-        support_name,
-        jp_release_date,
-        global_actual_date,
-        global_actual_end_date,
-        global_est_date,
-        global_est_end_date,
-        jp_days_until_next,
-        global_days_until_next,
-        image_path
-      FROM support_banner
-      WHERE
-        (
-          COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
-          AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
-        )
-        OR (
-          COALESCE(global_actual_end_date, global_est_end_date) IS NULL
-          AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
-        )
-      ORDER BY
-        COALESCE(global_actual_date, global_est_date),
-        id
-      LIMIT ${lim} OFFSET 0
-    `;
-    return ensureSupportRows(normalizeRows(res));
-  });
-}
-*/
-
-/* -------- combined (no args) -------- */
-export type BannersPayload = {
-  characters: CharacterRow[];
-  supports: SupportRow[];
-};
-
+/* ---------- main (prod only) ---------- */
 export async function getBannersCombined(): Promise<BannersPayload> {
   const lim = safeLimit();
   const key = `${CACHE_PREFIX}:dao:${CACHE_VERSION}:banners_combined:lim=${lim}`;
 
-  const charSQL = sql/* sql */`
-    SELECT
-      id,
-      uma_name,
-      jp_release_date,
-      global_actual_date,
-      global_actual_end_date,
-      global_est_date,
-      global_est_end_date,
-      jp_days_until_next,
-      global_days_until_next,
-      image_path
-    FROM character_banner
-    WHERE
-      (
-        COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
-        AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
-      )
-      OR (
-        COALESCE(global_actual_end_date, global_est_end_date) IS NULL
-        AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
-      )
-    ORDER BY COALESCE(global_actual_date, global_est_date), id
-    LIMIT ${lim} OFFSET 0
-  `;
-
-  const supSQL = sql/* sql */`
-    SELECT
-      id,
-      support_name,
-      jp_release_date,
-      global_actual_date,
-      global_actual_end_date,
-      global_est_date,
-      global_est_end_date,
-      jp_days_until_next,
-      global_days_until_next,
-      image_path
-    FROM support_banner
-    WHERE
-      (
-        COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
-        AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
-      )
-      OR (
-        COALESCE(global_actual_end_date, global_est_end_date) IS NULL
-        AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
-      )
-    ORDER BY COALESCE(global_actual_date, global_est_date), id
-    LIMIT ${lim} OFFSET 0
-  `;
-
-  // DEV: no Redis/cache, hit DB directly
-  if (isDevApp) {
-    const [charRes, supRes] = await Promise.all([charSQL, supSQL]);
-    return {
-      characters: ensureCharacterRows(normalizeRows(charRes)),
-      supports: ensureSupportRows(normalizeRows(supRes)),
-    };
-  }
-
-  // PROD: use cache
   return cacheJSON(key, MONTH_TTL_SECONDS, async () => {
-    const [charRes, supRes] = await Promise.all([charSQL, supSQL]);
+    const [charRes, supRes] = await Promise.all([
+      sql/* sql */`
+        SELECT
+          id,
+          uma_name,
+          jp_release_date,
+          global_actual_date,
+          global_actual_end_date,
+          global_est_date,
+          global_est_end_date,
+          jp_days_until_next,
+          global_days_until_next,
+          image_path
+        FROM character_banner
+        WHERE
+          (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
+            AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
+          )
+          OR (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NULL
+            AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
+          )
+        ORDER BY COALESCE(global_actual_date, global_est_date), id
+        LIMIT ${lim} OFFSET 0
+      `,
+      sql/* sql */`
+        SELECT
+          id,
+          support_name,
+          jp_release_date,
+          global_actual_date,
+          global_actual_end_date,
+          global_est_date,
+          global_est_end_date,
+          jp_days_until_next,
+          global_days_until_next,
+          image_path
+        FROM support_banner
+        WHERE
+          (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NOT NULL
+            AND COALESCE(global_actual_end_date, global_est_end_date) >= CURRENT_DATE
+          )
+          OR (
+            COALESCE(global_actual_end_date, global_est_end_date) IS NULL
+            AND COALESCE(global_actual_date, global_est_date) >= CURRENT_DATE
+          )
+        ORDER BY COALESCE(global_actual_date, global_est_date), id
+        LIMIT ${lim} OFFSET 0
+      `,
+    ]);
+
     const characters = ensureCharacterRows(normalizeRows(charRes));
     const supports = ensureSupportRows(normalizeRows(supRes));
     return { characters, supports };

@@ -4,19 +4,25 @@ import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
-const redis = Redis.fromEnv();
+const APP_ENV = process.env.APP_ENV ?? 'prod';
+const isDevApp = APP_ENV === 'dev';
 
-/**
- * API limiter: 60 requests per IP per minute, per route path.
- * Tweak numbers if you want stricter/looser.
- */
-const apiLimiter = new Ratelimit({
-  redis,
-  // Sliding window smooths bursts better than fixed window
-  limiter: Ratelimit.slidingWindow(60, '1 m'),
-  analytics: true,
-  prefix: '@rl:api',
-});
+const hasRedis =
+  !!process.env.UPSTASH_REDIS_REST_URL &&
+  !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// Only construct clients when we actually need them (prod with creds)
+const redis = !isDevApp && hasRedis ? Redis.fromEnv() : null;
+
+const apiLimiter =
+  !isDevApp && redis
+    ? new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(60, '1 m'),
+        analytics: true,
+        prefix: '@rl:api',
+      })
+    : null;
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -24,13 +30,16 @@ export async function middleware(req: NextRequest) {
   // Only rate-limit API routes
   if (!pathname.startsWith('/api/')) return NextResponse.next();
 
+  // In dev or if no Redis creds → skip rate limiting entirely (no Redis calls)
+  if (isDevApp || !apiLimiter) return NextResponse.next();
+
   // Best-effort IP (works on Vercel)
   const ip =
     req.ip ??
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
     '127.0.0.1';
 
-  // Key includes path so /api/banners/character & /api/banners/support have separate buckets
+  // Per-path key (e.g., /api/banners and /api/planner have separate buckets)
   const key = `${ip}:${pathname}`;
 
   const { success, limit, remaining, reset } = await apiLimiter.limit(key);
@@ -45,7 +54,6 @@ export async function middleware(req: NextRequest) {
   }
 
   const res = NextResponse.next();
-  // Nice-to-have: expose remaining counts
   res.headers.set('X-RateLimit-Limit', `${limit}`);
   res.headers.set('X-RateLimit-Remaining', `${remaining}`);
   res.headers.set('X-RateLimit-Reset', `${Math.floor(reset / 1000)}`);
