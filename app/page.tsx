@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import InputForm from "../components/InputForm";
 import Timeline from "../components/Timeline";
 import type { Metadata } from "next";
@@ -15,11 +16,15 @@ export default function HomePage() {
         <Header />
 
       <div id="main-body">
-        <main>
-          <InputForm />
-          <Timeline />
-        </main>
+        <div className="container">
+          <main>
+            <InputForm />
+            <Timeline />
+          </main>
+        </div>
       </div>
+      
+        <Footer />
     </>
   );
 }

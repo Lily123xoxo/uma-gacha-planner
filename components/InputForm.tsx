@@ -5,7 +5,7 @@ export default function InputForm() {
   return (
     <>
       {/* Full-width section for the form */}
-      <section className="form-container container-fluid">
+      <section className="form-container">
         <form id="planner-form" className="form-wrapper card rounded p-4 pb-3">
           <div className="row g-4 align-items-start">
   
