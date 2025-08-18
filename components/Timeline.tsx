@@ -36,12 +36,10 @@ export default function Timeline() {
         </div>
       </div>
 
-      <div className="timeline-wrapper">
-          <div className="timeline-scroll">
-            {/* Cards injected here */}
-          </div>
+      <div className="timeline-scroll">
+        {/* Cards injected here */}
       </div>
-
+      
       {/* Timeline JS */}
       <Script src="/js/timeline.js" strategy="afterInteractive" />
     </>

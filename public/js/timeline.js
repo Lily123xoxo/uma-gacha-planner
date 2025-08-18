@@ -177,7 +177,7 @@ function triggerCalculate(characterBanner, supportBanner) {
 
 const debouncedCalculate = debounce((characterBanner, supportBanner) => {
   triggerCalculate(characterBanner, supportBanner);
-}, 400);
+}, 600);
 
 // ---------- search ----------
 let searchMatches = [];
