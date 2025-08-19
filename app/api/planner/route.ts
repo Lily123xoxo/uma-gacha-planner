@@ -2,6 +2,11 @@
 import { NextResponse } from 'next/server';
 import gachaService from '@/services/gachaService';
 
+type BannerLike = {
+  global_actual_end_date?: string | null;
+  global_est_end_date?: string | null;
+} | null;
+
 type PlannerRequest = {
   carats?: number | string;
   clubRank?: string;
@@ -16,15 +21,39 @@ type PlannerRequest = {
   rainbowCleat?: boolean | string;
   goldCleat?: boolean | string;
   silverCleat?: boolean | string;
-  characterBanner?: {
-    global_actual_end_date?: string | null;
-    global_est_end_date?: string | null;
-  } | null;
+  characterBanner?: BannerLike;
+  supportBanner?: BannerLike;
 };
+
+function toBool(v: unknown): boolean {
+  return v === true || v === 'true';
+}
+
+// Normalize any DB/ISO string to "YYYY-MM-DD" (or null)
+function normalizeYMD(s?: string | null): string | null {
+  if (typeof s !== 'string') return null;
+  const t = s.trim();
+  if (t.length < 10) return null;
+  // Accept "YYYY-MM-DD", ISO, or "YYYY-MM-DD HH:mm:ss" by slicing first 10 chars.
+  const ymd = t.slice(0, 10);
+  // Light validation
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return null;
+  return ymd;
+}
 
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as PlannerRequest;
+
+    // Prefer characterBanner dates; fall back to supportBanner if needed
+    const rawEnd =
+      body?.characterBanner?.global_actual_end_date ??
+      body?.characterBanner?.global_est_end_date ??
+      body?.supportBanner?.global_actual_end_date ??
+      body?.supportBanner?.global_est_end_date ??
+      null;
+
+    const bannerEndDate = normalizeYMD(rawEnd);
 
     const data = {
       carats: Number(body.carats ?? 0),
@@ -33,17 +62,14 @@ export async function POST(req: Request) {
       champMeeting: Number(body.champMeeting ?? 0),
       characterTickets: Number(body.characterTickets ?? 0),
       supportTickets: Number(body.supportTickets ?? 0),
-      monthlyPass: body.monthlyPass === true || body.monthlyPass === 'true',
-      dailyLogin: body.dailyLogin === true || body.dailyLogin === 'true',
-      legendRace: body.legendRace === true || body.legendRace === 'true',
-      dailyMission: body.dailyMission === true || body.dailyMission === 'true',
-      rainbowCleat: body.rainbowCleat === true || body.rainbowCleat === 'true',
-      goldCleat: body.goldCleat === true || body.goldCleat === 'true',
-      silverCleat: body.silverCleat === true || body.silverCleat === 'true',
-      bannerStartDate:
-        body.characterBanner?.global_actual_end_date ??
-        body.characterBanner?.global_est_end_date ??
-        null,
+      monthlyPass: toBool(body.monthlyPass),
+      dailyLogin: toBool(body.dailyLogin),
+      legendRace: toBool(body.legendRace),
+      dailyMission: toBool(body.dailyMission),
+      rainbowCleat: toBool(body.rainbowCleat),
+      goldCleat: toBool(body.goldCleat),
+      silverCleat: toBool(body.silverCleat),
+      bannerEndDate, // "YYYY-MM-DD" or null
     };
 
     const result = gachaService.calculateRolls(data);
