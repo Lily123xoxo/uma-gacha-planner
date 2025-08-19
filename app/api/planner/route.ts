@@ -91,6 +91,52 @@ function endInstantFromLastDayUTC(lastDayStr: string | null) {
   return isNaN(d.getTime()) ? null : d;
 }
 
+/* ===== extra debug tick helpers (no impact on prod calc) ===== */
+const RESET_UTC_HOUR = 15;
+const RESET_UTC_MIN = 0;
+const MS_PER_DAY = 86_400_000;
+const MS_PER_WEEK = 7 * MS_PER_DAY;
+
+function nextDailyReset(afterUtc: Date) {
+  const base = new Date(Date.UTC(
+    afterUtc.getUTCFullYear(), afterUtc.getUTCMonth(), afterUtc.getUTCDate(),
+    RESET_UTC_HOUR, RESET_UTC_MIN, 0, 0
+  ));
+  if (base <= afterUtc) base.setUTCDate(base.getUTCDate() + 1);
+  return base;
+}
+
+function countDailyTicks(fromUtc: Date, toUtc: Date) {
+  if (!toUtc || toUtc <= fromUtc) return 0;
+  let tick = nextDailyReset(fromUtc);
+  if (tick > toUtc) return 0;
+  return 1 + Math.floor((toUtc.getTime() - tick.getTime()) / MS_PER_DAY);
+}
+
+function countWeeklyTicks(fromUtc: Date, toUtc: Date) {
+  if (!toUtc || toUtc <= fromUtc) return 0;
+  let tick = nextDailyReset(fromUtc);
+  if (tick > toUtc) return 0;
+  // Monday = 1 (UTC)
+  const deltaDays = (1 - tick.getUTCDay() + 7) % 7;
+  if (deltaDays > 0) tick = new Date(tick.getTime() + deltaDays * MS_PER_DAY);
+  if (tick > toUtc) return 0;
+  return 1 + Math.floor((toUtc.getTime() - tick.getTime()) / MS_PER_WEEK);
+}
+
+function countMonthlyTicksUTC(fromUtc: Date, toUtc: Date) {
+  if (!toUtc || toUtc <= fromUtc) return 0;
+  let tick = nextDailyReset(fromUtc);
+  if (tick > toUtc) return 0;
+  let count = 0;
+  while (tick <= toUtc) {
+    if (tick.getUTCDate() === 1) count++;
+    tick = new Date(tick.getTime() + MS_PER_DAY);
+  }
+  return count;
+}
+/* ===== end debug tick helpers ===== */
+
 export async function POST(req: Request) {
   try {
     const url = new URL(req.url);
@@ -144,6 +190,12 @@ export async function POST(req: Request) {
 
       const endUtc = endInstantFromLastDayUTC(bannerEndDate);
 
+      // compute tick counts for comparison across envs
+      const fromUtc = new Date(nowUtcISO);
+      const dailyTicks   = endUtc ? countDailyTicks(fromUtc, endUtc) : null;
+      const weeklyTicks  = endUtc ? countWeeklyTicks(fromUtc, endUtc) : null;
+      const monthlyTicks = endUtc ? countMonthlyTicksUTC(fromUtc, endUtc) : null;
+
       return NextResponse.json({
         _debug: {
           rawEndType: rawEnd === null ? 'null' : Array.isArray(rawEnd) ? 'array' : typeof rawEnd,
@@ -155,6 +207,9 @@ export async function POST(req: Request) {
           endBeforeOrEqualNow: endUtc ? endUtc <= new Date(nowUtcISO) : null,
           clubRank: data.clubRank,
           teamTrialsRank: data.teamTrialsRank,
+          dailyTicks,     // <= NEW
+          weeklyTicks,    // <= NEW
+          monthlyTicks    // <= NEW
         },
         rolls: result.rolls,
         carats: result.carats,
