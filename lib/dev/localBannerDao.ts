@@ -1,8 +1,7 @@
 // lib/localBannerDao.ts
 import mysql from "mysql2";
 import { query } from "./db.dev";
-
-const safeLimit = (n?: number) => parseInt(String(n ?? 90), 10) || 100;
+import { safeLimit } from "../bannerDao";
 
 export type LocalRow = {
   id: number;
@@ -23,8 +22,8 @@ export type BannersPayload = {
   supports: LocalRow[];
 };
 
-export async function getBannersCombinedLocal(limit?: number): Promise<BannersPayload> {
-  const lim = safeLimit(limit);
+export async function getBannersCombinedLocal(): Promise<BannersPayload> {
+  const lim = safeLimit();
 
   // Ensure session is UTC (optional, but nice to keep consistent)
   await query("SET time_zone = '+00:00'");

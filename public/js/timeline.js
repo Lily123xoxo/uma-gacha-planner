@@ -271,11 +271,6 @@ async function loadTimeline() {
 
     container.textContent = '';
 
-    const len = Math.min(characters.length, supports.length);
-    if (characters.length !== supports.length) {
-      console.warn(`Mismatched data — characters (${characters.length}) vs supports (${supports.length}). Truncating to ${len}.`);
-    }
-
     // Lazy load when card enters viewport
     const io = new IntersectionObserver((entries) => {
       for (const e of entries) {

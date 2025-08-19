@@ -41,7 +41,7 @@ const CACHE_VERSION = process.env.CACHE_VERSION ?? "v2";
 
 /** Single source of truth for DB read limit */
 export function safeLimit(): number {
-  const fallback = 61;
+  const fallback = 96;
   const max = 200;
   const raw = process.env.BANNERS_LIMIT;
   const parsed = Number.parseInt(String(raw ?? ""), 10);
