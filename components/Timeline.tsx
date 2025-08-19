@@ -1,4 +1,5 @@
 import Script from 'next/script';
+const v = process.env.NEXT_PUBLIC_APP_VERSION!;
 
 export default function Timeline() {
   return (
@@ -41,7 +42,9 @@ export default function Timeline() {
       </div>
       
       {/* Timeline JS */}
-      <Script src="/js/timeline.js" strategy="afterInteractive" />
+      <Script
+        src={`/js/timeline.js?v=${v}`} strategy="afterInteractive"
+      />
     </>
   );
 }
