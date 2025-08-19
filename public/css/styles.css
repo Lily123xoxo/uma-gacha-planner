@@ -636,6 +636,10 @@ select.form-select:focus > option:checked {
     flex: 0 0 67%; max-width: 67%;
   }
 
+  .form-label {
+    font-size: 1.2rem;
+  }
+
   .stockpile-card .row.g-2 > .col-sm-6 {
     flex: 0 0 100%;
     max-width: 100%;
