@@ -71,41 +71,50 @@ days AS (
 )
 SELECT
   d.day AS date,
-  COALESCE(
-    json_agg(DISTINCT jsonb_build_object(
-      'id', b.id,
-      'type', b.banner_type,
-      'name', b.name,
-      'image_path', b.image_path,
-      'start_date', b.day,
-      'start_kind', CASE WHEN b.actual_start IS NOT NULL THEN 'actual' ELSE 'est' END,
-      'end_date', b.actual_end,
-      'est_end_date', b.est_end,
-      'jp_release_date', b.jp_release_date,
-      'jp_days_until_next', b.jp_days_until_next,
-      'global_days_until_next', b.global_days_until_next
-    ) ORDER BY b.id)::json,
-    '[]'::json
-  ) FILTER (WHERE b.banner_type = 'character') AS characters,
-  COALESCE(
-    json_agg(DISTINCT jsonb_build_object(
-      'id', b.id,
-      'type', b.banner_type,
-      'name', b.name,
-      'image_path', b.image_path,
-      'start_date', b.day,
-      'start_kind', CASE WHEN b.actual_start IS NOT NULL THEN 'actual' ELSE 'est' END,
-      'end_date', b.actual_end,
-      'est_end_date', b.est_end,
-      'jp_release_date', b.jp_release_date,
-      'jp_days_until_next', b.jp_days_until_next,
-      'global_days_until_next', b.global_days_until_next
-    ) ORDER BY b.id)::json,
-    '[]'::json
-  ) FILTER (WHERE b.banner_type = 'support') AS supports
+
+  COALESCE((
+    SELECT json_agg(
+             json_build_object(
+               'id', b1.id,
+               'type', b1.banner_type,
+               'name', b1.name,
+               'image_path', b1.image_path,
+               'start_date', b1.day,
+               'start_kind', CASE WHEN b1.actual_start IS NOT NULL THEN 'actual' ELSE 'est' END,
+               'end_date', b1.actual_end,
+               'est_end_date', b1.est_end,
+               'jp_release_date', b1.jp_release_date,
+               'jp_days_until_next', b1.jp_days_until_next,
+               'global_days_until_next', b1.global_days_until_next
+             )
+             ORDER BY b1.id
+           )
+    FROM dedup b1
+    WHERE b1.day = d.day AND b1.banner_type = 'character'
+  ), '[]'::json) AS characters,
+
+  COALESCE((
+    SELECT json_agg(
+             json_build_object(
+               'id', b2.id,
+               'type', b2.banner_type,
+               'name', b2.name,
+               'image_path', b2.image_path,
+               'start_date', b2.day,
+               'start_kind', CASE WHEN b2.actual_start IS NOT NULL THEN 'actual' ELSE 'est' END,
+               'end_date', b2.actual_end,
+               'est_end_date', b2.est_end,
+               'jp_release_date', b2.jp_release_date,
+               'jp_days_until_next', b2.jp_days_until_next,
+               'global_days_until_next', b2.global_days_until_next
+             )
+             ORDER BY b2.id
+           )
+    FROM dedup b2
+    WHERE b2.day = d.day AND b2.banner_type = 'support'
+  ), '[]'::json) AS supports
+
 FROM days d
-LEFT JOIN dedup b ON b.day = d.day
-GROUP BY d.day
 ORDER BY d.day;
 `;
 
