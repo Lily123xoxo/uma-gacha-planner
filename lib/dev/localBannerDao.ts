@@ -26,11 +26,23 @@ export type BannersPayload = {
 export async function getBannersCombinedLocal(limit?: number): Promise<BannersPayload> {
   const lim = safeLimit(limit);
 
+  // Ensure session is UTC (optional, but nice to keep consistent)
+  await query("SET time_zone = '+00:00'");
+
   const charSQL = mysql.format(
     `
-    SELECT id, uma_name AS name, jp_release_date, global_actual_date, global_actual_end_date,
-           global_est_date, global_est_end_date, jp_days_until_next, global_days_until_next,
-           image_path, 'character' AS banner_type
+    SELECT
+      id,
+      uma_name AS name,
+      DATE_FORMAT(jp_release_date, '%Y-%m-%d')          AS jp_release_date,
+      DATE_FORMAT(global_actual_date, '%Y-%m-%d')       AS global_actual_date,
+      DATE_FORMAT(global_actual_end_date, '%Y-%m-%d')   AS global_actual_end_date,
+      DATE_FORMAT(global_est_date, '%Y-%m-%d')          AS global_est_date,
+      DATE_FORMAT(global_est_end_date, '%Y-%m-%d')      AS global_est_end_date,
+      jp_days_until_next,
+      global_days_until_next,
+      image_path,
+      'character' AS banner_type
     FROM character_banner
     WHERE global_actual_end_date >= CURDATE() OR global_est_end_date >= CURDATE()
     ORDER BY COALESCE(global_actual_date, global_est_date)
@@ -41,9 +53,18 @@ export async function getBannersCombinedLocal(limit?: number): Promise<BannersPa
 
   const supSQL = mysql.format(
     `
-    SELECT id, support_name AS name, jp_release_date, global_actual_date, global_actual_end_date,
-           global_est_date, global_est_end_date, jp_days_until_next, global_days_until_next,
-           image_path, 'support' AS banner_type
+    SELECT
+      id,
+      support_name AS name,
+      DATE_FORMAT(jp_release_date, '%Y-%m-%d')          AS jp_release_date,
+      DATE_FORMAT(global_actual_date, '%Y-%m-%d')       AS global_actual_date,
+      DATE_FORMAT(global_actual_end_date, '%Y-%m-%d')   AS global_actual_end_date,
+      DATE_FORMAT(global_est_date, '%Y-%m-%d')          AS global_est_date,
+      DATE_FORMAT(global_est_end_date, '%Y-%m-%d')      AS global_est_end_date,
+      jp_days_until_next,
+      global_days_until_next,
+      image_path,
+      'support' AS banner_type
     FROM support_banner
     WHERE global_actual_end_date >= CURDATE() OR global_est_end_date >= CURDATE()
     ORDER BY COALESCE(global_actual_date, global_est_date)
