@@ -2,13 +2,16 @@
 import { NextResponse } from 'next/server';
 import gachaService from '@/services/gachaService';
 
-// (Optional but recommended) ensure Node runtime, avoid edge quirks
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 type BannerLike = {
   global_actual_end_date?: string | Date | null;
   global_est_end_date?: string | Date | null;
+  // some feeds may use alternate keys; we coalesce them at runtime
+  actual_end_date?: string | Date | null;
+  est_end_date?: string | Date | null;
+  end_date?: string | Date | null;
 } | null;
 
 type PlannerRequest = {
@@ -33,14 +36,11 @@ function toBool(v: unknown): boolean {
   return v === true || v === 'true';
 }
 
-/**
- * Normalize DB/driver date to "YYYY-MM-DD".
- * Accepts Date objects, ISO strings, or "YYYY-MM-DD HH:mm:ss".
- */
+/** Normalize to "YYYY-MM-DD" (UTC). Accepts Date, ISO, YYYY-MM-DD..., or locale strings (e.g., AEST). */
 function normalizeYMD(s?: unknown): string | null {
   if (!s) return null;
 
-  // DB driver may return a Date instance in prod
+  // Date instance
   if (s instanceof Date && !isNaN(s.getTime())) {
     const y = s.getUTCFullYear();
     const m = String(s.getUTCMonth() + 1).padStart(2, '0');
@@ -50,37 +50,76 @@ function normalizeYMD(s?: unknown): string | null {
 
   if (typeof s === 'string') {
     const t = s.trim();
-    if (t.length >= 10) {
-      const ymd = t.slice(0, 10);
-      return /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : null;
+
+    // Fast path: leading YYYY-MM-DD
+    const mYMD = /^(\d{4})-(\d{2})-(\d{2})/.exec(t);
+    if (mYMD) return `${mYMD[1]}-${mYMD[2]}-${mYMD[3]}`;
+
+    // Fallback: let Date parse locale/ISO-ish strings
+    const d = new Date(t);
+    if (!isNaN(d.getTime())) {
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
   }
 
   return null;
 }
 
+/** Coalesce likely end-date fields from a banner-like object. */
+function pickEndDateLike(b: any): unknown {
+  if (!b) return null;
+  return (
+    b.global_actual_end_date ??
+    b.global_est_end_date ??
+    b.actual_end_date ??
+    b.est_end_date ??
+    b.end_date ??
+    null
+  );
+}
+
+/** Build end instant as 21:59 UTC on that day — debug only. */
+function endInstantFromLastDayUTC(lastDayStr: string | null) {
+  if (!lastDayStr) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(lastDayStr);
+  if (!m) return null;
+  const y = +m[1], mm = +m[2], dd = +m[3];
+  const d = new Date(Date.UTC(y, mm - 1, dd, 21, 59, 0, 0));
+  return isNaN(d.getTime()) ? null : d;
+}
+
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as PlannerRequest;
+    const url = new URL(req.url);
+    const debug = url.searchParams.get('debug') === '1';
 
-    // Prefer characterBanner dates; fall back to supportBanner if needed
+    // Read body
+    let body: PlannerRequest;
+    const raw = await req.text();
+    if (!raw) {
+      return NextResponse.json({ error: 'Empty body. Send application/json.' }, { status: 400 });
+    }
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON', raw: raw.slice(0, 200) }, { status: 400 });
+    }
+
+    // Prefer characterBanner; fall back to supportBanner
     const rawEnd =
-      body?.characterBanner?.global_actual_end_date ??
-      body?.characterBanner?.global_est_end_date ??
-      body?.supportBanner?.global_actual_end_date ??
-      body?.supportBanner?.global_est_end_date ??
+      pickEndDateLike(body?.characterBanner) ??
+      pickEndDateLike(body?.supportBanner) ??
       null;
 
     const bannerEndDate = normalizeYMD(rawEnd);
 
-    // Light input normalization (keeps service strict but avoids common pitfalls)
-    const clubRank = String(body.clubRank ?? '').trim();          // e.g., "A"
-    const teamTrialsRank = String(body.teamTrialsRank ?? '').trim(); // e.g., "Class6"
-
     const data = {
       carats: Number(body.carats ?? 0),
-      clubRank,                // keep case as provided; tests cover behavior
-      teamTrialsRank,          // keep case as provided
+      clubRank: String(body.clubRank ?? '').trim(),
+      teamTrialsRank: String(body.teamTrialsRank ?? '').trim(),
       champMeeting: Number(body.champMeeting ?? 0),
       characterTickets: Number(body.characterTickets ?? 0),
       supportTickets: Number(body.supportTickets ?? 0),
@@ -95,6 +134,34 @@ export async function POST(req: Request) {
     };
 
     const result = gachaService.calculateRolls(data);
+
+    if (debug) {
+      const now = new Date();
+      const nowUtcISO = new Date(Date.UTC(
+        now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),
+        now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds()
+      )).toISOString();
+
+      const endUtc = endInstantFromLastDayUTC(bannerEndDate);
+
+      return NextResponse.json({
+        _debug: {
+          rawEndType: rawEnd === null ? 'null' : Array.isArray(rawEnd) ? 'array' : typeof rawEnd,
+          rawEndIsDate: rawEnd instanceof Date,
+          rawEndString: typeof rawEnd === 'string' ? rawEnd : null,
+          bannerEndDate,
+          nowUtcISO,
+          endUtcISO: endUtc ? endUtc.toISOString() : null,
+          endBeforeOrEqualNow: endUtc ? endUtc <= new Date(nowUtcISO) : null,
+          clubRank: data.clubRank,
+          teamTrialsRank: data.teamTrialsRank,
+        },
+        rolls: result.rolls,
+        carats: result.carats,
+        supportTickets: result.supportTickets,
+        characterTickets: result.characterTickets,
+      });
+    }
 
     return NextResponse.json({
       rolls: result.rolls,
