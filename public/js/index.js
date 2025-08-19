@@ -17,7 +17,6 @@
     setVal('champMeeting', saved.champMeeting);
     setNum('characterTickets', saved.characterTickets);
     setNum('supportTickets', saved.supportTickets);
-
     setChk('monthlyPass', saved.monthlyPass);
     setChk('dailyLogin', saved.dailyLogin);
     setChk('legendRace', saved.legendRace);

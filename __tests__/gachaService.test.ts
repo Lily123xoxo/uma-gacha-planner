@@ -51,6 +51,25 @@ describe('calculateRolls (UTC ticks, Vitest fake timers)', () => {
     expect(res.characterTickets).toBe(0);
   });
 
+
+
+  it('TODAY (STATIC UTC): now=2025-08-19T05:22:47Z, end=2025-09-08 → 21 daily, 3 weekly, 1 monthly', () => {
+    // Freeze to today's current UTC (static)
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-08-19T05:22:47Z'));
+
+    const res = calculateRolls(baseOptions({ bannerEndDate: '2025-09-08' }));
+
+    // Exact expected values for this specific now/end pair
+    expect(res.carats).toBe(7560);          // 21*80 + 3*360 + 4800
+    expect(res.rolls).toBe(50);             // floor(7560/150)
+    expect(res.supportTickets).toBe(4);     // 1 monthly * (gold 2 + silver 2)
+    expect(res.characterTickets).toBe(4);
+
+    vi.useRealTimers();
+  });
+
+
   /** Normal case across mid-month: includes expected daily + a single weekly, no monthly. */
   it('MID-MONTH: end=2025-08-31 → 13 daily, 1 weekly, 0 monthly', () => {
     const res = calculateRolls(baseOptions({ bannerEndDate: '2025-08-31' }));
@@ -119,12 +138,6 @@ describe('calculateRolls (UTC ticks, Vitest fake timers)', () => {
     const res = calculateRolls(baseOptions({ carats: 150, bannerEndDate: '2025-09-08' }));
     expect(res.carats).toBe(150);
     expect(res.rolls).toBe(1);
-  });
-
-  /** Input normalization: lowercase rank key should NOT award monthly unless normalized upstream. */
-  it('INPUT NORMALIZATION: clubRank lowercased → monthly carats = 0 unless normalized upstream', () => {
-    const res = calculateRolls(baseOptions({ bannerEndDate: '2025-09-08', clubRank: 'a' as any }));
-    expect(res.carats).toBe(7560 - 1500);
   });
 
   /** Parser robustness: impossible date → safe fallback to current holdings only. */

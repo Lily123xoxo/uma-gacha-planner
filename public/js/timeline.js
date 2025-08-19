@@ -52,6 +52,43 @@ function enableDragScroll(container) {
   });
 }
 
+// Coalesce likely end-date fields from a banner-like object
+function pickEndDateLike(b) {
+  if (!b) return null;
+  return (
+    b.global_actual_end_date ??
+    b.global_est_end_date ??
+    b.actual_end_date ??
+    b.est_end_date ??
+    b.end_date ??
+    null
+  );
+}
+
+// Force any date-ish value to "YYYY-MM-DD" (UTC) or null
+function toYMDUTC(v) {
+  if (v == null) return null;
+
+  if (typeof v === 'string') {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(v.trim());
+    if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  }
+
+  if (v instanceof Date && !isNaN(v.getTime())) {
+    return v.toISOString().slice(0, 10);
+  }
+
+  if (typeof v === 'number' && isFinite(v)) {
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  }
+
+  return null;
+}
+
+
 // ---- helpers ----
 function escapeHTML(value) {
   return String(value ?? '')
@@ -128,6 +165,13 @@ function buildCard(i, charBanner, supportBanner, startDate, endDate, placeholder
 
 // ---------- calculate ----------
 function triggerCalculate(characterBanner, supportBanner) {
+
+  // Build a stable YMD end date for the request (prefer character, then support)
+  const rawEnd =
+  pickEndDateLike(characterBanner) ??
+  pickEndDateLike(supportBanner);
+  const bannerEndDate = toYMDUTC(rawEnd); // "YYYY-MM-DD" or null
+
   const payload = {
     carats: parseInt(document.querySelector('#carats')?.value) || 0,
     clubRank: document.querySelector('#clubRank')?.value || 'C',
@@ -142,6 +186,7 @@ function triggerCalculate(characterBanner, supportBanner) {
     rainbowCleat: document.querySelector('#rainbowCleat')?.checked || false,
     goldCleat: document.querySelector('#goldCleat')?.checked || false,
     silverCleat: document.querySelector('#silverCleat')?.checked || false,
+    bannerEndDate,
     characterBanner,
     supportBanner
   };
