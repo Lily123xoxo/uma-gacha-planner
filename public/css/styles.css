@@ -386,14 +386,13 @@ select.form-select:focus > option:checked {
   display: flex;
   gap: 1.5rem;
   overflow-x: auto;
-  padding-bottom: var(--vertical-section-spacing)
+  padding-bottom: var(--vertical-section-spacing);
 }
 
 .timeline-card {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  min-height: 40rem;
   padding-top: var(--vertical-section-spacing);
   width: 19.5rem;
 }
@@ -566,11 +565,6 @@ select.form-select:focus > option:checked {
   text-wrap: balance;
   font-size: var(--font-size-normal);
 }
-
-
-
-
-
 
 @keyframes fadeAura {
   0% {
