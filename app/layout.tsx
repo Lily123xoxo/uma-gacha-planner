@@ -30,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-bs-theme="dark">
       <body>
+        <div className="bg-layer" aria-hidden="true"></div>
         {children}
 
         {/* Vercel Analytics and Speed Insights */}

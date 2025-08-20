@@ -10,7 +10,8 @@
   --banner-darkmode-colour: #1b1b1b;
   --border-color: #ffffff26; 
   --button-border-color: #ffffff59;
-  --dark-transparent-color: #00000053;
+  --dark-overlay: #00000053;
+  --light-overlay: #00000029;
 
   /* Font weights */
   --font-extra-light: 200;
@@ -45,33 +46,47 @@ body {
   flex-direction: column;
 }
 
+.bg-layer{
+  position: fixed;
+  inset: -2px;             /* overscan to kill 1px gaps on some GPUs */
+  z-index: 0;
+  pointer-events: none;
+
+  /* your colours with extra bottom-left red */
+  background:
+    /* main bubble */
+    radial-gradient(
+      120vmax 120vmax at 30% 70%,
+      rgba(149, 128, 65, 0.1) 0%,
+      rgba(126, 80, 123, 0.25) 40%,
+      rgba(151, 51, 51, 0.3) 70%,
+      rgba(153, 51, 51, 0.1) 85%,   /* soft tail */
+      transparent 100%
+    ),
+    /* extra red punch bottom-left */
+    radial-gradient(
+      90vmax 90vmax at 0% 100%,
+      rgba(152, 51, 80, 0.1) 0%,
+      rgba(182,61,61,0.05) 45%,
+      rgba(182,61,61,0.03) 70%,
+      transparent 100%
+    );
+  background-repeat: no-repeat;
+  background-size: cover;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
+
 #main-body {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-width: 0;
   padding-bottom: var(--vertical-section-spacing);
-
-  background:
-    /* main pink/purple/red bubble */
-    radial-gradient(
-      120vmax 120vmax at 30% 70%,
-      rgba(145, 86, 103, 0.15) 0%,
-      rgba(130, 96, 154, 0.15) 40%,
-      rgba(182, 61, 61, 0.2) 70%,
-      transparent 100%
-    ),
-    /* extra red accent bottom-left */
-    radial-gradient(
-      80vmax 80vmax at 0% 100%,         /* locked to bottom-left corner */
-      rgba(182, 61, 61, 0.10) 0%,
-      rgba(149, 50, 50, 0.10) 40%,
-      transparent 100%
-    );
-  background-color: #1a1b20; /* fallback dark base */
-  background-repeat: no-repeat;
-  background-size: cover;
 }
+
 
 .site-header,
 #main-body,
@@ -190,7 +205,7 @@ body
   padding: 1rem;
   padding-bottom: 0.2rem;
   padding-top: 0.3rem;
-  background-color: var(--dark-transparent-color);
+  background-color: var(--light-overlay);
 }
 
 .ticket-row {
@@ -235,7 +250,7 @@ select.form-select:focus > option:checked {
   box-sizing: border-box;
   margin-bottom: var(--vertical-section-spacing);
   margin-top: var(--vertical-section-spacing);
-  background-color: var(--dark-transparent-color);
+  background-color: var(--dark-overlay);
 }
 
 .warchest {
@@ -376,7 +391,7 @@ select.form-select:focus > option:checked {
 }
 
 .timeline-card .card {
-  background: var(--dark-transparent-color);
+  background: var(--dark-overlay);
   border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   display: flex;
@@ -681,6 +696,29 @@ select.form-select:focus > option:checked {
   .footer-inner {
     font-size: var(--font-size-normal);
   }  
+}
+
+@media (max-width: 1000px) {
+  .bg-layer {
+    background:
+      /* main bubble (smaller + lighter) */
+      radial-gradient(
+        100vmax 100vmax at 35% 75%,
+        rgba(149, 128, 65, 0.08) 0%,
+        rgba(126, 80, 123, 0.18) 40%,
+        rgba(151, 51, 51, 0.20) 70%,
+        rgba(153, 51, 51, 0.08) 85%,
+        transparent 100%
+      ),
+      /* extra red punch bottom-left (smaller + softer) */
+      radial-gradient(
+        70vmax 70vmax at 0% 100%,
+        rgba(152, 51, 80, 0.08) 0%,
+        rgba(182,61,61,0.04) 45%,
+        rgba(182,61,61,0.02) 70%,
+        transparent 100%
+      );
+  }
 }
 
 @media (min-width: 992px) and (max-width: 1199.98px) {
