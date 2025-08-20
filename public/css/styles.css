@@ -458,21 +458,59 @@ select.form-select:focus > option:checked {
   user-select: none;
 }
 
-/* ensure card body padding is driven by the Bootstrap variable */
-.timeline-card .card .card-body {
-  padding: var(--bs-card-spacer-y, 1rem) var(--bs-card-spacer-x, 1rem);
-}
+/* Base date band on ALL cards (full-bleed + clipped to card radius) */
+.timeline-card .card .card-body > .date-span {
+  display: block;
+  color: var(--white-text-color);
+  /* spacing inside the band */
+  padding: .6rem var(--bs-card-spacer-x, 1rem);
+  margin: 0 0 .75rem 0;
 
-/* full-bleed hr spans to the card’s inner edges */
-.timeline-card .card .card-body > hr.full-bleed {
-  border: 0;
-  height: 1px;                  /* thickness */
-  background: var(--border-color);
-  margin-top: .5rem;            /* keep your vertical rhythm */
-  margin-bottom: .5rem;
+  /* full-bleed left/right within the card */
   margin-left: calc(-1 * var(--bs-card-spacer-x, 1rem));
   margin-right: calc(-1 * var(--bs-card-spacer-x, 1rem));
+
+  /* “eat” the card-body top padding so band starts at the very top */
+  margin-top: calc(-1 * var(--bs-card-spacer-y, 1rem));
+  padding-top: calc(var(--bs-card-spacer-y, 1rem));
+  padding-bottom: calc(var(--bs-card-spacer-y, 1rem));;
+
+  /* match the card’s rounded corners */
+  border-top-left-radius: .75rem;
+  border-top-right-radius: .75rem;
+
+  /* default background */
+  background: linear-gradient(
+    180deg,
+    rgba(199, 199, 199, 0.596),
+    #1d1c20cf
+  );
 }
+
+/* Active cards: swap band background to your highlight color */
+.timeline-card .card.select-banner-card.is-active .card-body > .date-span,
+.timeline-card .card.select-banner-card[data-active="1"] .card-body > .date-span {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 223, 171, 0.67),
+    #1d1c20cf
+  );
+}
+
+/* Keep the native <hr> suppressed everywhere in timeline cards */
+.timeline-card hr,
+.timeline-card .card hr,
+.timeline-card .card .card-body > hr {
+  display: none;
+}
+
+
+
+
+
+
+
+
 
 /* Thin scrollbar styling */
 .timeline-scroll::-webkit-scrollbar {
@@ -529,6 +567,10 @@ select.form-select:focus > option:checked {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  .timeline-card .card .card-body > .date-span {
+    font-size: 1.05rem;
   }
 
   .search-bar {

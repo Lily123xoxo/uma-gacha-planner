@@ -249,7 +249,7 @@
     card.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }
 
-  // --- autoscroll helpers (every hard reload; not on soft nav/HMR) ---
+  // --- autoscroll helpers (every hard reload; supports ?autoscroll=1) ---
   const DEV_FORCE_AUTOSCROLL =
     new URLSearchParams(location.search).has("autoscroll") || (location.hash || "").includes("autoscroll");
 
@@ -257,10 +257,9 @@
     try {
       const nav = performance.getEntriesByType?.("navigation")?.[0];
       if (nav && typeof nav.type === "string") return nav.type === "reload";
-      // legacy fallback
-      return performance.navigation && performance.navigation.type === 1; // TYPE_RELOAD
+      return performance.navigation && performance.navigation.type === 1;
     } catch {
-      return true; // if undetectable, allow
+      return true;
     }
   }
   function shouldRunInitialAutoScroll() {
@@ -268,6 +267,7 @@
     return isHardReload();
   }
 
+  // --- active marking helpers ---
   function ymdLocalToday() {
     const d = new Date();
     const y = d.getFullYear();
@@ -288,6 +288,12 @@
     }
     return end;
   }
+  function isGroupActive(g) {
+    const today = ymdLocalToday();
+    const start = toYMDUTC(g.date);
+    const end = groupEndYMD(g) || start;
+    return !!(start && end && start <= today && today <= end);
+  }
   function findFirstActiveIndex(days) {
     const today = ymdLocalToday();
     for (let i = 0; i < days.length; i++) {
@@ -296,12 +302,20 @@
       const end = groupEndYMD(g) || start;
       if (start && end && start <= today && today <= end) return i;
     }
-    // fallback: first future start
     for (let i = 0; i < days.length; i++) {
       const start = toYMDUTC(days[i].date);
       if (start && start >= today) return i;
     }
     return days.length ? 0 : -1;
+  }
+  function markActiveCards(days, container) {
+    container.querySelectorAll(".select-banner-card.is-active").forEach((el) => el.classList.remove("is-active"));
+    for (let i = 0; i < days.length; i++) {
+      if (isGroupActive(days[i])) {
+        const el = container.querySelector(`.select-banner-card[data-index="${i}"]`);
+        if (el) el.classList.add("is-active");
+      }
+    }
   }
 
   // --- loader for grouped endpoint ---
@@ -345,11 +359,13 @@
         io.observe(cardWrapper);
       }
 
-      // scroll to first active (hard reloads only), no focus/selection/compute
+      // mark active cards (non-destructive; doesn't touch .selected/.calculating)
+      markActiveCards(days, container);
+
+      // autoscroll to first active on hard reload (or ?autoscroll=1), no focus/selection/compute
       if (shouldRunInitialAutoScroll()) {
         const activeIdx = findFirstActiveIndex(days);
         if (activeIdx !== -1) {
-          // ensure layout is flushed so offsets are correct
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const card = container.querySelector(`.select-banner-card[data-index="${activeIdx}"]`);
@@ -378,7 +394,7 @@
         if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
       });
 
-      // select + calculate
+      // select + calculate (keeps .is-active; only toggles .selected/.calculating)
       container.addEventListener("click", (e) => {
         const card = e.target.closest(".select-banner-card");
         if (!card || isDragging) return;
