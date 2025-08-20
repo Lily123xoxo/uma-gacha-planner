@@ -34,6 +34,18 @@
   --vertical-section-spacing: 1.5rem;
 }
 
+html {
+  /* was default/transparent before */
+  background:
+    radial-gradient(
+      110vw 110vh at 30% 70%,
+      rgba(254,147,177,0.15) 0%,
+      rgba(169, 124, 201, 0.15) 40%,
+      rgba(213, 78, 78, 0.15) 90%,
+      transparent 70%
+    );
+}
+
 html, body {
   height: 100%; /* Ensure html and body take full height */
 }
@@ -43,22 +55,6 @@ body {
   font-family: system-ui, sans-serif;
   display: flex;
   flex-direction: column;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(
-      110vw 110vh at 30% 70%,
-      rgba(254,147,177,0.07) 0%,
-      rgba(184,161,201,0.07) 40%,
-      transparent 70%
-    ),
-    linear-gradient(160deg, #1a1b20 0%, #232428 60%, #1a1b20 100%);
-  pointer-events: none;
 }
 
 #main-body {
@@ -74,6 +70,7 @@ body::before {
 .site-footer {
   width: 100%;
   min-width: 0;
+  z-index: 1;
 }
 
 .site-footer {
@@ -156,8 +153,6 @@ body::before {
 }
 
 /* Body */
-
-/* Whole page background */
 
 .banner-title-wrapper {
   background-color: var(--banner-darkmode-colour);
@@ -491,8 +486,8 @@ select.form-select:focus > option:checked {
 .timeline-card .card.select-banner-card[data-active="1"] .card-body > .date-span {
   background: linear-gradient(
     180deg,
-    rgba(255, 141, 217, 0.738),
-    #1d1c20cf
+    rgba(186, 77, 106, 0.738),
+    #1a1a1a52
   );
 }
 
