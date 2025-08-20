@@ -458,6 +458,22 @@ select.form-select:focus > option:checked {
   user-select: none;
 }
 
+/* ensure card body padding is driven by the Bootstrap variable */
+.timeline-card .card .card-body {
+  padding: var(--bs-card-spacer-y, 1rem) var(--bs-card-spacer-x, 1rem);
+}
+
+/* full-bleed hr spans to the card’s inner edges */
+.timeline-card .card .card-body > hr.full-bleed {
+  border: 0;
+  height: 1px;                  /* thickness */
+  background: var(--border-color);
+  margin-top: .5rem;            /* keep your vertical rhythm */
+  margin-bottom: .5rem;
+  margin-left: calc(-1 * var(--bs-card-spacer-x, 1rem));
+  margin-right: calc(-1 * var(--bs-card-spacer-x, 1rem));
+}
+
 /* Thin scrollbar styling */
 .timeline-scroll::-webkit-scrollbar {
   height: 8px;
