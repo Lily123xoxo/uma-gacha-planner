@@ -34,18 +34,6 @@
   --vertical-section-spacing: 1.5rem;
 }
 
-html {
-  /* was default/transparent before */
-  background:
-    radial-gradient(
-      110vw 110vh at 30% 70%,
-      rgba(254,147,177,0.15) 0%,
-      rgba(169, 124, 201, 0.15) 40%,
-      rgba(213, 78, 78, 0.15) 90%,
-      transparent 70%
-    );
-}
-
 html, body {
   height: 100%; /* Ensure html and body take full height */
 }
@@ -60,9 +48,29 @@ body {
 #main-body {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;   /* this is the one that should grow */
-  min-width: 0;     /* prevents horizontal overflow from flex children */
+  flex: 1 1 auto;
+  min-width: 0;
   padding-bottom: var(--vertical-section-spacing);
+
+  background:
+    /* main pink/purple/red bubble */
+    radial-gradient(
+      120vmax 120vmax at 30% 70%,
+      rgba(145, 86, 103, 0.15) 0%,
+      rgba(130, 96, 154, 0.15) 40%,
+      rgba(182, 61, 61, 0.2) 70%,
+      transparent 100%
+    ),
+    /* extra red accent bottom-left */
+    radial-gradient(
+      80vmax 80vmax at 0% 100%,         /* locked to bottom-left corner */
+      rgba(182, 61, 61, 0.10) 0%,
+      rgba(149, 50, 50, 0.10) 40%,
+      transparent 100%
+    );
+  background-color: #1a1b20; /* fallback dark base */
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .site-header,
@@ -70,7 +78,6 @@ body {
 .site-footer {
   width: 100%;
   min-width: 0;
-  z-index: 1;
 }
 
 .site-footer {
@@ -93,6 +100,12 @@ body {
   font-weight: bold;
   position: relative;
   top: 0.13rem;
+}
+
+.site-header,
+body
+{
+  background-color: none;
 }
 
 .site-header {
