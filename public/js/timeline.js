@@ -249,25 +249,28 @@
     card.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }
 
-  // --- autoscroll helpers (every hard reload; supports ?autoscroll=1) ---
+  // --- autoscroll helpers (run on any hard page load; supports ?autoscroll=1) ---
   const DEV_FORCE_AUTOSCROLL =
     new URLSearchParams(location.search).has("autoscroll") || (location.hash || "").includes("autoscroll");
 
-  function isHardReload() {
+  function isHardPageLoad() {
     try {
-      const nav = performance.getEntriesByType?.("navigation")?.[0];
-      if (nav && typeof nav.type === "string") return nav.type === "reload";
-      return performance.navigation && performance.navigation.type === 1;
-    } catch {
-      return true;
-    }
+      const nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+      if (nav && typeof nav.type === "string") {
+        // cover both first-time direct visits and explicit reloads
+        return nav.type === "navigate" || nav.type === "reload";
+      }
+      if (performance && performance.navigation) {
+        const t = performance.navigation.type; // 0: navigate, 1: reload
+        return t === 0 || t === 1;
+      }
+    } catch {}
+    return true;
   }
   function shouldRunInitialAutoScroll() {
     if (DEV_FORCE_AUTOSCROLL) return true;
-    return isHardReload();
+    return isHardPageLoad();
   }
-
-  // --- active marking helpers ---
   function ymdLocalToday() {
     const d = new Date();
     const y = d.getFullYear();
@@ -300,7 +303,7 @@
       const g = days[i];
       const start = toYMDUTC(g.date);
       const end = groupEndYMD(g) || start;
-      if (start && end && start <= today && today <= end) return i;
+      if (start && end && start <= today && today <= end) return i; // first active, left→right
     }
     for (let i = 0; i < days.length; i++) {
       const start = toYMDUTC(days[i].date);
@@ -316,6 +319,51 @@
         if (el) el.classList.add("is-active");
       }
     }
+  }
+
+  // NEW: robust left/center alignment based on geometry (no off-by-one visuals)
+  function autoScrollToFirstActive(days, container, opts = {}) {
+    const { align = "left", offset = 0 } = opts; // align: "left" | "center"
+    const idx = findFirstActiveIndex(days);
+    if (idx === -1) return;
+
+    const scrollNow = () => {
+      const card = container.querySelector(`.select-banner-card[data-index="${idx}"]`);
+      const wrapper = card ? (card.closest(".timeline-card") || card) : null;
+      if (!wrapper) return;
+
+      const cRect = container.getBoundingClientRect();
+      const wRect = wrapper.getBoundingClientRect();
+
+      let delta = wRect.left - cRect.left; // amount wrapper is from the visible left edge
+      if (align === "center") {
+        delta -= (container.clientWidth - wrapper.clientWidth) / 2;
+      }
+
+      const targetLeft = Math.max(0, container.scrollLeft + delta - offset);
+
+      if (typeof container.scrollTo === "function") {
+        container.scrollTo({ left: targetLeft, behavior: "smooth" });
+      } else {
+        container.scrollLeft = targetLeft;
+      }
+    };
+
+    // after layout/images: two RAFs + microtask
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(scrollNow, 0);
+      });
+    });
+
+    // one last pass after window load, only if user hasn't scrolled
+    window.addEventListener(
+      "load",
+      () => {
+        if (container.scrollLeft < 16) scrollNow();
+      },
+      { once: true }
+    );
   }
 
   // --- loader for grouped endpoint ---
@@ -359,28 +407,11 @@
         io.observe(cardWrapper);
       }
 
-      // mark active cards (non-destructive; doesn't touch .selected/.calculating)
       markActiveCards(days, container);
 
-      // autoscroll to first active on hard reload (or ?autoscroll=1), no focus/selection/compute
+      // autoscroll to first active on hard page load (or ?autoscroll=1)
       if (shouldRunInitialAutoScroll()) {
-        const activeIdx = findFirstActiveIndex(days);
-        if (activeIdx !== -1) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              const card = container.querySelector(`.select-banner-card[data-index="${activeIdx}"]`);
-              const wrapper = card ? card.closest(".timeline-card") : null;
-              if (wrapper) {
-                const targetLeft = wrapper.offsetLeft - (container.clientWidth - wrapper.clientWidth) / 2;
-                if (typeof container.scrollTo === "function") {
-                  container.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
-                } else {
-                  container.scrollLeft = Math.max(0, targetLeft);
-                }
-              }
-            });
-          });
-        }
+        autoScrollToFirstActive(days, container, { align: "left" }); // ← change to "center" if you prefer
       }
 
       // drag vs click detection
@@ -394,7 +425,7 @@
         if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
       });
 
-      // select + calculate (keeps .is-active; only toggles .selected/.calculating)
+      // select + calculate
       container.addEventListener("click", (e) => {
         const card = e.target.closest(".select-banner-card");
         if (!card || isDragging) return;

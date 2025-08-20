@@ -370,7 +370,6 @@ select.form-select:focus > option:checked {
 .timeline-card .card {
   background: var(--dark-transparent-color);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
   border-radius: 0.75rem;
   display: flex;
   flex: 1;
@@ -392,22 +391,22 @@ select.form-select:focus > option:checked {
 }
 
 .timeline-card .card.selected {
-  border: 2px solid var(--primary-site-color);
+  border: 1px solid var(--primary-site-color);
 }
 
 .timeline-card .card.selected.select-banner-card:hover {
-  border: 2px solid var(--primary-site-color);
+  border: 1px solid var(--primary-site-color);
   box-shadow: 10px 4px 10px -3px var(--primary-site-color);
 }
 
 .timeline-card .card.selected.select-banner-card:hover:active,
 .timeline-card .card.selected.select-banner-card:active {
-  border: 2px solid var(--tertiary-site-color);
+  border: 1px solid var(--tertiary-site-color);
   box-shadow: 10px 4px 10px -3px var(--tertiary-site-color);
 }
 
 .timeline-card .card.select-banner-card:has(:active) {
-  border: 2px solid var(--tertiary-site-color);
+  border: 1px solid var(--tertiary-site-color);
   box-shadow: 10px 4px 10px -3px var(--tertiary-site-color);
 }
 
@@ -476,8 +475,8 @@ select.form-select:focus > option:checked {
   padding-bottom: calc(var(--bs-card-spacer-y, 1rem));;
 
   /* match the card’s rounded corners */
-  border-top-left-radius: 0.6em;
-  border-top-right-radius: 0.6rem;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
 
   /* default background */
   background: linear-gradient(
@@ -492,7 +491,7 @@ select.form-select:focus > option:checked {
 .timeline-card .card.select-banner-card[data-active="1"] .card-body > .date-span {
   background: linear-gradient(
     180deg,
-    rgba(0, 223, 171, 0.67),
+    rgba(255, 141, 217, 0.738),
     #1d1c20cf
   );
 }
@@ -503,14 +502,6 @@ select.form-select:focus > option:checked {
 .timeline-card .card .card-body > hr {
   display: none;
 }
-
-
-
-
-
-
-
-
 
 /* Thin scrollbar styling */
 .timeline-scroll::-webkit-scrollbar {
