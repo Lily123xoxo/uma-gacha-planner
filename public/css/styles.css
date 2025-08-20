@@ -698,7 +698,7 @@ select.form-select:focus > option:checked {
   }  
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 991.98px) {
   .bg-layer {
     background:
       /* main bubble (smaller + lighter) */

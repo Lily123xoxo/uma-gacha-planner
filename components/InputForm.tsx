@@ -106,7 +106,7 @@ export default function InputForm() {
               {/* Row 2: Bonus Income + Monthly Purchases */}
               <div className="row g-4 booleans-row">
                 <div className="col-12 col-sm-5 col-lg-5">
-                  <label className="form-label">Bonuses:</label>
+                  <label htmlFor="bonuses" className="form-label">Bonuses:</label>
                   <div className="form-check">
                     <input type="checkbox" id="dailyLogin" name="dailyLogin" className="form-check-input" />
                     <label htmlFor="dailyLogin" className="form-check-label">Daily login</label>
@@ -122,7 +122,7 @@ export default function InputForm() {
                 </div>
 
                 <div className="col-12 col-sm-7 col-lg">
-                  <label className="form-label">Monthlies:</label>
+                  <label htmlFor="monthlies" className="form-label">Monthlies:</label>
                   <div className="form-check">
                     <input type="checkbox" id="monthlyPass" name="monthlyPass" className="form-check-input" />
                     <label htmlFor="monthlyPass" className="form-check-label">Daily carat pass</label>
