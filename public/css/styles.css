@@ -5,6 +5,7 @@
   --support-text-color: #ea8f4d;
   --tertiary-site-color: #b8a1c9;
   --teal-site-color: #5fc8b2;
+  --crimson-site-color: #BA4D6ABC;
   --uma-text-color: #61a1e5;
   --white-text-color: #eaeaea;
   --banner-darkmode-colour: #1b1b1b;
@@ -259,7 +260,7 @@ select.form-select:focus > option:checked {
   letter-spacing: 0.01em;
   color: var(--white-text-color);
   padding-left: 0.5rem;
-  border-left: 2px solid var(--teal-site-color);
+  border-left: 3px solid var(--crimson-site-color);
   opacity: 0.95;
 }
 
@@ -514,7 +515,7 @@ select.form-select:focus > option:checked {
 .timeline-card .card.select-banner-card[data-active="1"] .card-body > .date-span {
   background: linear-gradient(
     180deg,
-    rgba(186, 77, 106, 0.738),
+    var(--crimson-site-color),
     #1a1a1a52
   );
 }
@@ -765,6 +766,11 @@ select.form-select:focus > option:checked {
     max-width: 300px;
   }
 
+  #results {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   body {
     font-size: var(--font-size-x-large);
   }
@@ -810,8 +816,13 @@ select.form-select:focus > option:checked {
     max-width: 400px;
   }
 
+  .container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
   body {
-    font-size: var(--font-size-xx-large);
+    font-size: var(--font-size-xxx-large);
   }
 
   .footer-inner {

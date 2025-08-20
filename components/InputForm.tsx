@@ -106,39 +106,50 @@ export default function InputForm() {
               {/* Row 2: Bonus Income + Monthly Purchases */}
               <div className="row g-4 booleans-row">
                 <div className="col-12 col-sm-5 col-lg-5">
-                  <label htmlFor="bonuses" className="form-label">Bonuses:</label>
-                  <div className="form-check">
-                    <input type="checkbox" id="dailyLogin" name="dailyLogin" className="form-check-input" />
-                    <label htmlFor="dailyLogin" className="form-check-label">Daily login</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" id="legendRace" name="legendRace" className="form-check-input" />
-                    <label htmlFor="legendRace" className="form-check-label">Legend races</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" id="dailyMission" name="dailyMission" className="form-check-input" />
-                    <label htmlFor="dailyMission" className="form-check-label">Daily missions</label>
-                  </div>
+                  <fieldset className="form-group">
+                    <legend className="form-label">Bonuses</legend>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="dailyLogin" name="dailyLogin" className="form-check-input" />
+                      <label htmlFor="dailyLogin" className="form-check-label">Daily login</label>
+                    </div>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="legendRace" name="legendRace" className="form-check-input" />
+                      <label htmlFor="legendRace" className="form-check-label">Legend races</label>
+                    </div>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="dailyMission" name="dailyMission" className="form-check-input" />
+                      <label htmlFor="dailyMission" className="form-check-label">Daily missions</label>
+                    </div>
+                  </fieldset>
                 </div>
 
                 <div className="col-12 col-sm-7 col-lg">
-                  <label htmlFor="monthlies" className="form-label">Monthlies:</label>
-                  <div className="form-check">
-                    <input type="checkbox" id="monthlyPass" name="monthlyPass" className="form-check-input" />
-                    <label htmlFor="monthlyPass" className="form-check-label">Daily carat pass</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" id="silverCleat" name="silverCleat" className="form-check-input" />
-                    <label htmlFor="silverCleat" className="form-check-label">Silver cleats tickets</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" id="goldCleat" name="goldCleat" className="form-check-input" />
-                    <label htmlFor="goldCleat" className="form-check-label">Gold cleats tickets</label>
-                  </div>
-                  <div className="form-check">
-                    <input type="checkbox" id="rainbowCleat" name="rainbowCleat" className="form-check-input" />
-                    <label htmlFor="rainbowCleat" className="form-check-label">Rainbow cleats tickets</label>
-                  </div>
+                  <fieldset className="form-group">
+                    <legend className="form-label">Monthlies</legend>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="monthlyPass" name="monthlyPass" className="form-check-input" />
+                      <label htmlFor="monthlyPass" className="form-check-label">Daily carat pass</label>
+                    </div>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="silverCleat" name="silverCleat" className="form-check-input" />
+                      <label htmlFor="silverCleat" className="form-check-label">Silver cleats tickets</label>
+                    </div>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="goldCleat" name="goldCleat" className="form-check-input" />
+                      <label htmlFor="goldCleat" className="form-check-label">Gold cleats tickets</label>
+                    </div>
+
+                    <div className="form-check">
+                      <input type="checkbox" id="rainbowCleat" name="rainbowCleat" className="form-check-input" />
+                      <label htmlFor="rainbowCleat" className="form-check-label">Rainbow cleats tickets</label>
+                    </div>
+                  </fieldset>
                 </div>
               </div>
             </div>
