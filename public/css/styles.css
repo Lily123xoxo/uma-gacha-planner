@@ -476,8 +476,8 @@ select.form-select:focus > option:checked {
   padding-bottom: calc(var(--bs-card-spacer-y, 1rem));;
 
   /* match the card’s rounded corners */
-  border-top-left-radius: .75rem;
-  border-top-right-radius: .75rem;
+  border-top-left-radius: 0.6em;
+  border-top-right-radius: 0.6rem;
 
   /* default background */
   background: linear-gradient(
