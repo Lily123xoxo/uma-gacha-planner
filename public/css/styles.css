@@ -11,7 +11,7 @@
   --banner-darkmode-colour: #1b1b1b;
   --border-color: #ffffff26; 
   --button-border-color: #ffffff59;
-  --dark-overlay: #00000053;
+  --dark-overlay: #00000042;
   --light-overlay: #00000029;
 
   /* Font weights */
@@ -501,7 +501,7 @@ select.form-select:focus > option:checked {
   /* default background */
   background: linear-gradient(
     180deg,
-    rgba(199, 199, 199, 0.596),
+    rgba(169, 220, 234, 0.596),
     #1d1c20cf
   );
 }
@@ -576,6 +576,99 @@ select.form-select:focus > option:checked {
   100% {
     opacity: 0;
   }
+}
+
+/* --- Layered stack for 3+ banners --- */
+.banner-group .banner-stack {
+  position: relative;
+  display: block;
+  background: transparent;
+  min-height: 9.25rem;                /* same footprint as a single unit */
+  overflow: hidden;                    /* keep peeks tidy */
+}
+
+/* Each banner (image + title) is a layer */
+.banner-stack .banner-layer {
+  position: absolute;
+  inset: .25rem .25rem .25rem .25rem; /* leave border/padding visible */
+  display: grid;
+  grid-template-rows: 1fr auto;       /* image area, then name */
+  align-items: end;
+  transition: transform .25s ease, opacity .25s ease, filter .25s ease;
+  pointer-events: none;               /* clicks pass through to card; nav button handles flipping */
+}
+
+/* Image inside the layer */
+.banner-stack .banner-layer .banner-img {
+  max-width: 100%;
+  height: auto;
+  max-height: auto;
+  object-fit: contain;
+  justify-self: center;
+}
+
+/* Top layer (last child after rotation) — full, sharp */
+.banner-stack .banner-layer:nth-last-child(1) {
+  transform: translate(0,0) scale(1);
+  opacity: 1;
+  filter: none;
+  z-index: 3;
+}
+
+/* Second layer peeks out a bit */
+.banner-stack .banner-layer:nth-last-child(2) {
+  transform: translate(-8%, 8%) scale(.94);
+  opacity: .65;
+  filter: saturate(.85);
+  z-index: 2;
+}
+
+/* Third layer peeks more, lighter */
+.banner-stack .banner-layer:nth-last-child(3) {
+  transform: translate(-12%, 12%) scale(.88);
+  opacity: .45;
+  filter: saturate(.7);
+  z-index: 1;
+}
+
+/* Hide anything deeper than 3 to keep the unit clean */
+.banner-stack .banner-layer:nth-last-child(n+4) {
+  display: none;
+}
+
+/* Curved-arrow flip button (only element that accepts pointer events) */
+.banner-stack .stack-nav {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 3px solid rgb(220, 126, 12);
+  background: rgb(255, 224, 173);
+  color: var(--white-text-color);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  pointer-events: auto;               /* this one IS clickable */
+}
+
+.banner-stack .stack-nav:hover {
+  border-color: var(--secondary-site-color);
+  box-shadow: 0 0 0 1px var(--secondary-site-color) inset;
+}
+
+/* Hide all text labels by default */
+.banner-stack .banner-layer .uma-name,
+.banner-stack .banner-layer .support-name {
+  visibility: hidden;
+}
+
+/* Only show text on the top (last) layer */
+.banner-stack .banner-layer:last-child .uma-name,
+.banner-stack .banner-layer:last-child .support-name {
+  visibility: visible;
 }
 
 /* Media Queries */

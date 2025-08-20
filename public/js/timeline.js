@@ -1,5 +1,8 @@
 // public/js/timeline.bundle.js
 (function () {
+  // --- config ---
+  const STACK_THRESHOLD = 2; // only layer/flip when a group has 2+ items
+
   // --- utils ---
   function debounce(fn, delay) {
     let t;
@@ -140,6 +143,76 @@
     });
     return section;
   }
+
+  // Build a layered stack (used only when items.length >= STACK_THRESHOLD)
+  function buildBannerStack(items, placeholder, kind) {
+    const stack = el("div", { class: "banner-stack", "data-kind": kind, "data-index": "0" });
+
+    (items || []).forEach((b, i) => {
+      const imgAlt = b?.name || kind;
+      const imgSrc = safeImageSrc(b?.image_path || "");
+      const img = el("img", {
+        class: "banner-img",
+        alt: imgAlt,
+        loading: "lazy",
+        decoding: "async",
+        fetchpriority: "low",
+        src: placeholder,
+        "data-src": imgSrc,
+      });
+      const title = el("h3", { class: "mb-2", text: b?.name || "" });
+      title.classList.add(kind === "support" ? "support-name" : "uma-name");
+
+      const layer = el("div", { class: "banner-layer", "data-pos": String(i) }, [img, title]);
+      stack.appendChild(layer);
+    });
+
+    if ((items?.length || 0) > 1) {
+      const btn = el(
+        "button",
+        {
+          class: "stack-nav stack-next",
+          type: "button",
+          title: "Flip to next",
+          "aria-label": "Flip to next",
+          "data-dir": "next",
+        },
+        [
+          el("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", "aria-hidden": "true" }, [
+            el("path", {
+              d: "M12 5c4.418 0 8 3.582 8 8h-2.5l3.5 4 3.5-4H22c0-5.523-4.477-10-10-10S2 7.477 2 13h2a8 8 0 0 1 8-8Z",
+              stroke: "currentColor",
+              "stroke-width": "2",
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round",
+            }),
+          ]),
+        ]
+      );
+      stack.appendChild(btn);
+    }
+    
+    const firstLayer = stack.querySelector('.banner-layer[data-pos="0"]');
+    if (firstLayer) stack.appendChild(firstLayer);
+
+    return stack;
+  }
+
+  // Choose between flat list (1–2 banners) vs layered stack (3+)
+  function buildBannerGroup(items, placeholder, kind) {
+    const wrap = el("div", { class: `banner-group ${kind === "support" ? "supports" : "characters"}` });
+    if (!items || items.length === 0) return wrap;
+
+    if (items.length < STACK_THRESHOLD) {
+      // render flat (your current look)
+      items.forEach((b) => wrap.appendChild(buildBannerThumb(b, placeholder, kind)));
+    } else {
+      // render layered stack with flip button
+      wrap.appendChild(buildBannerStack(items, placeholder, kind));
+    }
+    return wrap;
+  }
+
   function buildGroupCard(index, dayGroup, placeholder) {
     const wrapper = el("div", { class: "timeline-card" });
     const startDate = formatLocalDate(dayGroup.date);
@@ -155,11 +228,9 @@
     const header = el("p", { class: "mb-2 date-span", text: `${startDate} → ${endDate}` });
     const hr = el("hr", { class: "my-2 full-bleed" });
 
-    const charsWrap = el("div", { class: "banner-group characters" });
-    for (const cb of (dayGroup.characters || [])) charsWrap.appendChild(buildBannerThumb(cb, placeholder, "character"));
-
-    const suppsWrap = el("div", { class: "banner-group supports" });
-    for (const sb of (dayGroup.supports || [])) suppsWrap.appendChild(buildBannerThumb(sb, placeholder, "support"));
+    // NEW: groups decide flat vs stack based on length
+    const charsWrap = buildBannerGroup(dayGroup.characters || [], placeholder, "character");
+    const suppsWrap = buildBannerGroup(dayGroup.supports || [], placeholder, "support");
 
     const body = el("div", { class: "card-body" }, [header, hr, charsWrap, suppsWrap]);
     const card = el("div", { class: "card select-banner-card", "data-index": String(index) }, body);
@@ -168,9 +239,18 @@
   }
 
   // --- planner trigger using first char/support of the day ---
-  function triggerCalculateFromDay(dayGroup) {
-    const firstChar = (dayGroup.characters && dayGroup.characters[0]) || null;
-    const firstSupp = (dayGroup.supports && dayGroup.supports[0]) || null;
+  function triggerCalculateFromDay(dayGroup, cardEl) {
+    // If a stack is present, prefer the currently visible (top) item via data-index
+    let charIdx = 0, suppIdx = 0;
+    if (cardEl) {
+      const cStack = cardEl.querySelector('.banner-stack[data-kind="character"]');
+      const sStack = cardEl.querySelector('.banner-stack[data-kind="support"]');
+      if (cStack) charIdx = parseInt(cStack.dataset.index || "0", 10) || 0;
+      if (sStack) suppIdx = parseInt(sStack.dataset.index || "0", 10) || 0;
+    }
+
+    const firstChar = (dayGroup.characters || [])[charIdx] || (dayGroup.characters || [])[0] || null;
+    const firstSupp = (dayGroup.supports || [])[suppIdx] || (dayGroup.supports || [])[0] || null;
 
     const characterBanner = toCharacterRow(firstChar);
     const supportBanner = toSupportRow(firstSupp);
@@ -223,8 +303,8 @@
         if (resultsDiv) resultsDiv.textContent = `Calculation failed: ${err.message}`;
       });
   }
-  const debouncedCalculate = debounce((dayGroup) => {
-    triggerCalculateFromDay(dayGroup);
+  const debouncedCalculate = debounce((dayGroup, cardEl) => {
+    triggerCalculateFromDay(dayGroup, cardEl);
   }, 600);
 
   // --- search ---
@@ -276,7 +356,7 @@
     const end = groupEndYMD(g) || start;
     return !!(start && end && start <= today && today <= end);
   }
-  // NEW: filter predicate — keep Active or Upcoming (end >= today)
+  // Filter predicate — keep Active or Upcoming (end >= today)
   function isActiveOrUpcoming(g) {
     const today = ymdLocalToday();
     const start = toYMDUTC(g.date);
@@ -351,8 +431,26 @@
         if (Math.abs(e.clientX - dragStartX) > dragThreshold) isDragging = true;
       });
 
-      // select + calculate
+      // CLICK HANDLER (flip buttons + select/calc)
       container.addEventListener("click", (e) => {
+        // 1) handle stack flip if a helper button was clicked
+        const navBtn = e.target.closest(".stack-nav");
+        if (navBtn) {
+          e.stopPropagation(); // don't trigger select+calculate
+          const stack = navBtn.closest(".banner-stack");
+          if (stack) {
+            const layers = stack.querySelectorAll(".banner-layer");
+            if (layers.length > 1) {
+              // move top layer to the end (rotate forward)
+              stack.appendChild(layers[0]);
+              const idx = (parseInt(stack.dataset.index || "0", 10) + 1) % layers.length;
+              stack.dataset.index = String(idx);
+            }
+          }
+          return; // handled
+        }
+
+        // 2) normal card selection + calculate
         const card = e.target.closest(".select-banner-card");
         if (!card || isDragging) return;
         const index = parseInt(card.dataset.index, 10);
@@ -363,14 +461,20 @@
         );
         card.classList.add("selected", "calculating");
 
+        // Persist which banner(s) were on top at click time
+        const cStack = card.querySelector('.banner-stack[data-kind="character"]');
+        const sStack = card.querySelector('.banner-stack[data-kind="support"]');
+        const charIdx = cStack ? parseInt(cStack.dataset.index || "0", 10) || 0 : 0;
+        const suppIdx = sStack ? parseInt(sStack.dataset.index || "0", 10) || 0 : 0;
+
         const saved = JSON.parse(localStorage.getItem("plannerSelections") || "{}");
-        const firstChar = (dayGroup.characters && dayGroup.characters[0]) || null;
-        const firstSupp = (dayGroup.supports && dayGroup.supports[0]) || null;
-        saved.characterBanner = toCharacterRow(firstChar);
-        saved.supportBanner = toSupportRow(firstSupp);
+        const chosenChar = (dayGroup.characters || [])[charIdx] || (dayGroup.characters || [])[0] || null;
+        const chosenSupp = (dayGroup.supports || [])[suppIdx] || (dayGroup.supports || [])[0] || null;
+        saved.characterBanner = toCharacterRow(chosenChar);
+        saved.supportBanner = toSupportRow(chosenSupp);
         localStorage.setItem("plannerSelections", JSON.stringify(saved));
 
-        debouncedCalculate(dayGroup);
+        debouncedCalculate(dayGroup, card);
       });
 
       window.dispatchEvent(new Event("timelineLoaded"));
