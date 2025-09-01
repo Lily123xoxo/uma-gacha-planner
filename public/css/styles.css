@@ -501,8 +501,8 @@ select.form-select:focus > option:checked {
   /* default background */
   background: linear-gradient(
     180deg,
-    rgba(117, 202, 255, 0.733),
-    #1d1c20cf
+    rgba(117, 202, 255, 0.452),
+    #1a1a1a52
   );
 }
 

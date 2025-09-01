@@ -51,7 +51,12 @@ describe('calculateRolls (UTC ticks, Vitest fake timers)', () => {
     expect(res.characterTickets).toBe(0);
   });
 
-
+  /** Sullys time when they found 48 should have been 47? - EXPLANATION: Inclusive banner end dates for carat gains */
+  it('The Sully Regression Test', () => {
+    vi.setSystemTime(new Date('2025-08-21T15:39:00Z'))
+    const res = calculateRolls(baseOptions({ carats: 7185, bannerEndDate: '2025-08-22' }))
+    expect(res.rolls).toBe(48);
+  })
 
   it('TODAY (STATIC UTC): now=2025-08-19T05:22:47Z, end=2025-09-08 → 21 daily, 3 weekly, 1 monthly', () => {
     // Freeze to today's current UTC (static)

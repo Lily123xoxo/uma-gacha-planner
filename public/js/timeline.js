@@ -330,13 +330,7 @@
   }
 
   // --- date helpers / active state ---
-  function ymdLocalToday() {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
+  // (UPDATED: use UTC with a start time of 22:00 UTC on the group's start date)
   function bannerEndYMD(b) {
     return toYMDUTC(b?.end_date) || toYMDUTC(b?.est_end_date) || null;
   }
@@ -350,18 +344,35 @@
     }
     return end;
   }
-  function isGroupActive(g) {
-    const today = ymdLocalToday();
-    const start = toYMDUTC(g.date);
-    const end = groupEndYMD(g) || start;
-    return !!(start && end && start <= today && today <= end);
+  function parseYMD(ymd) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd || "");
+    if (!m) return null;
+    return { y: +m[1], mo: +m[2] - 1, d: +m[3] };
   }
-  // Filter predicate — keep Active or Upcoming (end >= today)
+  function dateAtUTCTime(ymd, h = 0, m = 0, s = 0, ms = 0) {
+    const p = parseYMD(ymd);
+    if (!p) return null;
+    return new Date(Date.UTC(p.y, p.mo, p.d, h, m, s, ms));
+  }
+  function groupStartUTCDateTime(g) {
+    const startY = toYMDUTC(g.date);
+    return startY ? dateAtUTCTime(startY, 22, 0, 0, 0) : null; // 22:00 UTC start
+  }
+  function groupEndUTCDateTime(g) {
+    const endY = groupEndYMD(g) || toYMDUTC(g.date);
+    return endY ? dateAtUTCTime(endY, 23, 59, 59, 999) : null; // end-of-day UTC
+  }
+  function isGroupActive(g) {
+    const startDT = groupStartUTCDateTime(g);
+    const endDT = groupEndUTCDateTime(g) || startDT;
+    const now = new Date(); // current time (UTC-based comparisons via Date objects)
+    return !!(startDT && endDT && startDT <= now && now <= endDT);
+  }
+  // Filter predicate — keep Active or Upcoming (end >= now UTC)
   function isActiveOrUpcoming(g) {
-    const today = ymdLocalToday();
-    const start = toYMDUTC(g.date);
-    const end = groupEndYMD(g) || start;
-    return !!(start && end && end >= today);
+    const endDT = groupEndUTCDateTime(g) || groupStartUTCDateTime(g);
+    const now = new Date();
+    return !!(endDT && endDT >= now);
   }
   function markActiveCards(days, container) {
     container.querySelectorAll(".select-banner-card.is-active").forEach((el) => el.classList.remove("is-active"));
