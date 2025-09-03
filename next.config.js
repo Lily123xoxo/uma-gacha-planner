@@ -89,14 +89,6 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'no-store, must-revalidate' },
         ],
       },
-
-      // 6) Belt & suspenders: force revalidation of timeline.js (you asked to keep this)
-      {
-        source: '/js/timeline.js',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
     ];
   },
 };
