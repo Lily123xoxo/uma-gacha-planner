@@ -68,7 +68,7 @@ const nextConfig = {
         source: '/:all*.(avif|webp|png|jpg|jpeg|gif|svg|ico|css|js|map|woff|woff2|ttf|otf|mp4|webm|mp3)',
         headers: [
           // 1 day TTL; serves from cache during that day (no request), then SWR refresh in background
-          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=31536000' },
+          { key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=31536000' },
         ],
       },
 
