@@ -448,6 +448,10 @@ select.form-select:focus > option:checked {
   font-weight: 600;
 }
 
+.timeline-card h3.mb-2 {
+  margin-bottom: .35rem;  /* consistent small gap under the name */
+}
+
 .timeline-card img {
   height: auto;
   max-width: 100%;
@@ -677,9 +681,43 @@ select.form-select:focus > option:checked {
 
 @media (max-width: 575.98px) {
 
+    /* Make height follow card width; ignore the desktop min-height */
+  .banner-group .banner-stack {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+  }
+
+  /* Collapse the hidden name row so lower layers don’t reserve space */
+  .banner-stack .banner-layer:not(:last-child) {
+    grid-template-rows: 1fr 0;
+  }
+  .banner-stack .banner-layer:not(:last-child) .uma-name,
+  .banner-stack .banner-layer:not(:last-child) .support-name {
+    display: none;
+  }
+
+  /* Ensure the image fills the aspect box without stretching */
+  .banner-stack .banner-layer .banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* --- Tighten banner stack peek transforms on very small screens --- */
+  .banner-stack .banner-layer:nth-last-child(2) {
+    transform: translate(-5%, 4%) scale(.97);
+  }
+  .banner-stack .banner-layer:nth-last-child(3) {
+    transform: translate(-7%, 7%) scale(.93);
+  }
+
   .uma-name,
   .support-name {
-    font-size: var(--font-size-small);
+  -webkit-line-clamp: 3;
+  line-height: 1.16;               /* consistent line spacing */
+  line-clamp: 3;
+  min-height: calc(1.16em * 3);
   }
 
   .banner-search {
@@ -715,9 +753,8 @@ select.form-select:focus > option:checked {
   }
 
   .timeline-card .card,
-  .timeline-card,
-  .timeline-card img {
-    max-width: 80vw;
+  .timeline-card {
+    max-width: 85vw;
   }
 
   .timeline-card img {
