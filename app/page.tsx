@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "umaplanner",
   description:
-    "Optimise your rolling plans for the Uma Musume gacha game with an interactive timeline and calculator. Track character banners, support banners and more.",
+    "Optimise your rolling plans for the Uma Musume gacha game with umaplanner; an interactive timeline and calculator. Track character banners, support banners and more.",
 };
 
 export default function HomePage() {

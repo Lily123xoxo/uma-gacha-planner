@@ -2,11 +2,10 @@ import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'umaplanner',
-  description: 'Gacha planner & banner timeline for Uma Musume.',
+  description: 'Umaplanner. Uma musume gacha game planner and timeline.',
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -35,7 +34,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Vercel Analytics and Speed Insights */}
         <Analytics />
-        <SpeedInsights />
 
         {/* Bootstrap JS */}
         <Script
