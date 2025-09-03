@@ -46,7 +46,7 @@ const nextConfig = {
         ],
       },
 
-      // 1) Next build assets: long-lived + immutable (no revalidation -> no 304s)
+      // Next build assets: safe to cache "forever"
       {
         source: '/_next/static/:path*',
         headers: [
@@ -54,39 +54,37 @@ const nextConfig = {
         ],
       },
 
-      // 2) Optimized images (/_next/image?url=...) — cache at browser and CDN
-      // Note: Next already sets decent defaults, but this makes it explicit.
+      // OPTIONAL: Versioned public assets (folder-based “hash”), if you adopt /assets/<version>/...
       {
-        source: '/_next/image',
-        headers: [
-          // s-maxage for CDN, max-age for browser
-          { key: 'Cache-Control', value: 'public, s-maxage=31536000, max-age=31536000, immutable' },
-        ],
-      },
-
-      // 3) Public/static assets by extension (images, css/js, fonts, svg, etc.)
-      // Use hashed filenames for anything that can change over time.
-      {
-        source: '/:all*(?<ext>\\.avif|\\.webp|\\.png|\\.jpe?g|\\.gif|\\.svg|\\.ico|\\.css|\\.js|\\.map|\\.woff2?|\\.ttf|\\.otf|\\.mp4|\\.webm|\\.mp3)',
+        source: '/assets/:version/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
 
-      // 4) Keep HTML non-sticky (so your pages update when you deploy)
-      // Applies to root and any path without a file extension (i.e., likely HTML routes).
+      // Unhashed public assets by extension (png/jpg/css/js/fonts/etc.)
+      // Using a build-safe matcher: /:all*.(ext1|ext2|...)
       {
-        source: '/((?!_next/|api/|.*\\.[a-zA-Z0-9]+).*)',
+        source: '/:all*.(avif|webp|png|jpg|jpeg|gif|svg|ico|css|js|map|woff|woff2|ttf|otf|mp4|webm|mp3)',
+        headers: [
+          // 1 day TTL; serves from cache during that day (no request), then SWR refresh in background
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=31536000' },
+        ],
+      },
+
+      // Keep HTML/API fresh (don’t sticky-cache documents)
+      {
+        source: '/api/:path*',
         headers: [
           { key: 'Cache-Control', value: 'no-store, must-revalidate' },
         ],
       },
 
-      // 5) API routes should not be cached by the browser
+      // Belt & suspenders: force revalidation of timeline.js
       {
-        source: '/api/:path*',
+        source: '/js/timeline.js',
         headers: [
-          { key: 'Cache-Control', value: 'no-store, must-revalidate' },
+          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
         ],
       },
     ];
