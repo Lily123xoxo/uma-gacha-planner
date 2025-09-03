@@ -544,7 +544,7 @@ select.form-select:focus > option:checked {
 /* Firefox */
 .timeline-scroll {
   scrollbar-color: rgba(255,255,255,0.2) transparent;
-  scrollbar-width: auto;
+  scrollbar-width: thin;
 }
 
 .uma-name {
