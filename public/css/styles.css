@@ -677,6 +677,11 @@ select.form-select:focus > option:checked {
 
 @media (max-width: 575.98px) {
 
+  .uma-name,
+  .support-name {
+    font-size: var(--font-size-small);
+  }
+
   .banner-search {
     align-items: flex-start;
     flex-direction: column;
