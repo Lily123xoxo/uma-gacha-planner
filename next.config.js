@@ -62,12 +62,12 @@ const nextConfig = {
         ],
       },
 
-      // Unhashed public assets by extension (png/jpg/css/js/fonts/etc.)
+      // Unhashed public assets which aren't js/css by extension (png/jpg/fonts/etc.)
       // Using a build-safe matcher: /:all*.(ext1|ext2|...)
       {
-        source: '/:all*.(avif|webp|png|jpg|jpeg|gif|svg|ico|css|js|map|woff|woff2|ttf|otf|mp4|webm|mp3)',
+        source: '/:all*.(avif|webp|png|jpg|jpeg|gif|svg|ico|map|woff|woff2|ttf|otf|mp4|webm|mp3)',
         headers: [
-          // 1 day TTL; serves from cache during that day (no request), then SWR refresh in background
+          // 1 month TTL; serves from cache during that day (no request), then SWR refresh in background
           { key: 'Cache-Control', value: 'public, max-age=2592000, stale-while-revalidate=31536000' },
         ],
       },
