@@ -1,4 +1,3 @@
-// public/js/timeline.bundle.js
 (function () {
   // --- config ---
   const STACK_THRESHOLD = 2; // only layer/flip when a group has 2+ items
