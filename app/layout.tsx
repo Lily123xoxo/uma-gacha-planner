@@ -4,8 +4,8 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  title: 'umaplanner',
-  description: 'Umaplanner. Uma musume gacha game planner and timeline.',
+  title: 'Uma Planner - Gacha banner timeline & planner | umaplanner',
+  description: 'Plan your pulls with Uma Planner - a free gacha planning tool and timeline for Uma Musume fans.',
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },

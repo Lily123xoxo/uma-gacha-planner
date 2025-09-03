@@ -5,9 +5,9 @@ import Timeline from "../components/Timeline";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "umaplanner",
+  title: "Uma Planner - Gacha banner timeline & planner | umaplanner",
   description:
-    "Optimise your rolling plans for the Uma Musume gacha game with umaplanner; an interactive timeline and calculator. Track character banners, support banners and more.",
+    "Plan your pulls and track banners with Uma Planner; an interactive timeline and calculator. Track character banners, support banners and your carats.",
 };
 
 export default function HomePage() {

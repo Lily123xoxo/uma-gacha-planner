@@ -286,8 +286,9 @@ select.form-select:focus > option:checked {
 }
 
 .banner-img {
-  contain-intrinsic-size: 300px 100px;
-  content-visibility: auto;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .form-check-input,
