@@ -5,7 +5,7 @@ import Timeline from "../components/Timeline";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Uma Planner - Gacha banner timeline & planner | umaplanner",
+  title: "Uma Musume Planner - gacha banner timeline & planner | uma planner",
   description:
     "Plan your pulls and track banners with Uma Planner; an interactive timeline and calculator. Track character banners, support banners and your carats.",
 };
