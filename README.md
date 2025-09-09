@@ -1,2 +1,2 @@
 # umagachaplanner
-planner for managing resources for uma musume global
+Planner for managing resources for uma musume global
