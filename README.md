@@ -1,5 +1,5 @@
-====================================
- Uma Planner - README
+
+Uma Planner - README
 ====================================
 
 Description:
