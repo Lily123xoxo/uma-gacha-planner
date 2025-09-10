@@ -92,7 +92,6 @@ body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
   padding-bottom: var(--vertical-section-spacing);
 }
 
-
 .site-header,
 #main-body,
 .site-footer {
@@ -144,6 +143,10 @@ body
   line-height: 1;      /* tighter line height */
   align-self: flex-end;/* if parent is flex */
   padding-left: 2.5rem;
+}
+
+.lead {
+  align-content: end;
 }
 
 .suggestions-form {

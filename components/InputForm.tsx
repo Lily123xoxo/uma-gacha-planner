@@ -1,9 +1,12 @@
-// components/InputForm.tsx
 'use client';
 
 export default function InputForm() {
   return (
     <>
+      <p className="lead text-center m-1">
+          Plan your pulls with Uma Planner — a free, easy-to-use timeline and tracker for Uma Musume banners.
+      </p>
+
       {/* Full-width section for the form */}
       <section className="form-container" data-nosnippet>
         <form id="planner-form" className="form-wrapper card rounded p-4 pb-3">

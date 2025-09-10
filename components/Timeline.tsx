@@ -37,7 +37,7 @@ export default function Timeline() {
         </div>
       </div>
 
-      <div className="timeline-scroll">
+      <div className="timeline-scroll" data-nosnippet>
         {/* Cards injected here */}
       </div>
       
