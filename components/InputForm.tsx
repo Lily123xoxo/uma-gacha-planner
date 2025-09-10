@@ -5,7 +5,7 @@ export default function InputForm() {
   return (
     <>
       {/* Full-width section for the form */}
-      <section className="form-container">
+      <section className="form-container" data-nosnippet>
         <form id="planner-form" className="form-wrapper card rounded p-4 pb-3">
           <div className="row g-4 align-items-start">
   
@@ -23,7 +23,7 @@ export default function InputForm() {
                   name="carats"
                   required
                   className="form-control mb-3"
-                  // IMPORTANT: do NOT add value={...} here unless you also add onChange
+                  // IMPORTANT: do NOT add value={...} here
                   // leave it uncontrolled so index.js can set .value at runtime
                 />
 

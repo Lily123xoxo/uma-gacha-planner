@@ -5,7 +5,7 @@ export default function Timeline() {
   return (
     <>
       {/* Row containing title and search */}
-      <div className="d-flex justify-content-between align-items-center banner-search">
+      <div className="d-flex justify-content-between align-items-center banner-search data" data-nosnippet>
         <div className="banner-title-wrapper">
           <h2 className="banner-title">
             <span className="gradient-text">Banner Timeline</span>
