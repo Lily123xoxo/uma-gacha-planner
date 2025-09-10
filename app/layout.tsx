@@ -4,8 +4,15 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
-  title: 'Uma Musume Planner - gacha banner timeline & planner | uma planner',
-  description: 'Plan your pulls with Uma Planner - a free gacha planning tool and timeline for Uma Musume fans.',
+  metadataBase: new URL('https://www.umaplanner.horse'),
+  title: {
+    default: 'Uma Planner — Banner timeline & planner for Uma Musume',
+    template: '%s · Uma Planner',
+  },
+  description:
+    'Plan your pulls with Uma Planner — a free banner timeline and tracker for the Uma Musume gacha game.',
+  alternates: { canonical: '/' },
+  robots: { index: true, follow: true },
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -14,7 +21,15 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
-};
+  openGraph: {
+    url: 'https://www.umaplanner.horse',
+    siteName: 'Uma Planner',
+    title: 'Uma Planner — Gacha banner timeline & tracker',
+    description:
+      'Plan your pulls with Uma Planner — a free banner timeline and gacha tracker.',
+    type: 'website',
+  },
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
