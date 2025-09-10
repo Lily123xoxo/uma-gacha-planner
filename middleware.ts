@@ -60,7 +60,7 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-// Apply only to API routes (don’t rate limit static assets/pages)
 export const config = {
-  matcher: ['/api/:path*'],
+  // Apply to API routes except /api/planner
+  matcher: ['/api/(?!planner$).*'],
 };
