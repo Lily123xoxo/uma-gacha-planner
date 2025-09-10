@@ -145,10 +145,6 @@ body
   padding-left: 2.5rem;
 }
 
-.lead {
-  align-content: end;
-}
-
 .suggestions-form {
   display: flex;             /* makes the span itself flex */
 }
@@ -257,7 +253,6 @@ select.form-select:focus > option:checked {
 .form-wrapper {
   box-sizing: border-box;
   margin-bottom: var(--vertical-section-spacing);
-  margin-top: var(--vertical-section-spacing);
   background-color: var(--dark-overlay);
 }
 
