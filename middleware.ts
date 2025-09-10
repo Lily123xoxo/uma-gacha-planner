@@ -1,3 +1,14 @@
+// middleware.ts
+import { NextResponse } from 'next/server';
+
+// No-op handler (always allow)
+export function middleware() {
+  return NextResponse.next();
+}
+
+// Match nothing so it never runs
+export const config = { matcher: [] };
+
 // CURRENTLY UNUSED
 
 /*
