@@ -1,4 +1,6 @@
-// middleware.ts
+// CURRENTLY UNUSED
+
+/*
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
@@ -60,7 +62,6 @@ export async function middleware(req: NextRequest) {
   return res;
 }
 
-export const config = {
-  // Apply to API routes except /api/planner
-  matcher: ['/api/(?!planner$).*'],
-};
+// Currently rate-limits nothing, but can be updated to include or exclude paths as needed
+export const config = { matcher: [] };
+*/
