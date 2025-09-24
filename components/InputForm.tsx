@@ -4,8 +4,10 @@ export default function InputForm() {
   return (
     <>
       <p className="lead text-center mb-3 mt-3">
-        Plan your pulls with Uma Planner — a free, easy-to-use timeline and tracker for Uma Musume banners.
+        Plan your pulls with Uma Planner — a free, easy-to-use timeline and tracker for Uma Musume banners. <br></br>
+        Thank you for your patience while the latest carat values are implemented!
       </p>
+      
 
       {/* Full-width section for the form */}
       <section className="form-container" data-nosnippet>
