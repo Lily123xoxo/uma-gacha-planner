@@ -1,4 +1,10 @@
-// services/gachaService.js
+/*
+*
+* TODO:
+* 
+*/
+
+
 
 // ======== CONFIG (UTC) ========
 const RESET_UTC_HOUR = 15;  // daily reset 15:00 UTC
@@ -12,14 +18,14 @@ const clubRankMap = {
 };
 
 const teamTrialsRankMap = {
-  CLASS6: 250, CLASS5: 150, CLASS4: 100, CLASS3: 50, CLASS2: 25, CLASS1: 0
+  CLASS6: 375, CLASS5: 225, CLASS4: 150, CLASS3: 75, CLASS2: 35, CLASS1: 0
 };
 
 const CARATS_PER_ROLL = 150;
-const WEEKLY_LOGIN_CARATS = 110;
+const DAILY_LOGIN_CARATS = 150; // 150 a week
 const MONTHLY_PASS_DAILY_CARATS = 50;
 const MONTHLY_PASS_IMMEDIATE_CARATS = 500;
-const DAILY_MISSION_CARATS = 30;
+const DAILY_MISSION_CARATS = 75;
 const LEGEND_RACE_MONTHLY_CARATS = 1000;
 
 // ======== GENERIC COERCION ========
@@ -206,7 +212,7 @@ function calculateMonthlyCarats(opts, monthsCrossed) {
 
 function calculateWeeklyCarats(opts, weeksCrossed) {
   let carats = 0;
-  if (opts.dailyLogin) carats += WEEKLY_LOGIN_CARATS * weeksCrossed;
+  if (opts.dailyLogin) carats += DAILY_LOGIN_CARATS * weeksCrossed;
   carats += (teamTrialsRankMap[opts.teamTrialsRank] || 0) * weeksCrossed;
   return carats;
 }

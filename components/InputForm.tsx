@@ -5,7 +5,8 @@ export default function InputForm() {
     <>
       <p className="lead text-center mb-3 mt-3">
         Plan your pulls with Uma Planner — a free, easy-to-use timeline and tracker for Uma Musume banners. <br></br>
-        Thank you for your patience while the latest carat values are implemented!
+        Updated with the latest carat values as of 24 September 2025. <br></br>
+        Champions Meeting and Club values will be updated when new carat values are confirmed.
       </p>
       
 
@@ -70,16 +71,16 @@ export default function InputForm() {
                   <label htmlFor="clubRank" className="form-label">Club Rank:</label>
                   <select id="clubRank" name="clubRank" required className="form-select" defaultValue="">
                     <option value="" disabled>Select a value</option>
-                    <option value="SS">SS</option>
-                    <option value="Splus">S+</option>
-                    <option value="S">S</option>
-                    <option value="Aplus">A+</option>
-                    <option value="A">A</option>
-                    <option value="Bplus">B+</option>
-                    <option value="B">B</option>
-                    <option value="Cplus">C+</option>
-                    <option value="C">C</option>
-                    <option value="Dplus">D+</option>
+                    <option value="SS">SS (3000)</option>
+                    <option value="Splus">S+ (2400)</option>
+                    <option value="S">S (2100)</option>
+                    <option value="Aplus">A+ (1800)</option>
+                    <option value="A">A (1500)</option>
+                    <option value="Bplus">B+ (1200)</option>
+                    <option value="B">B (900)</option>
+                    <option value="Cplus">C+ (600)</option>
+                    <option value="C">C (300)</option>
+                    <option value="Dplus">D+ (150)</option>
                   </select>
                 </div>
 
@@ -87,14 +88,21 @@ export default function InputForm() {
                   <label htmlFor="teamTrialsRank" className="form-label">Team Trials Class:</label>
                   <select id="teamTrialsRank" name="teamTrialsRank" required className="form-select" defaultValue="">
                     <option value="" disabled>Select a value</option>
-                    <option value="Class6">Class 6</option>
-                    <option value="Class5">Class 5</option>
-                    <option value="Class4">Class 4</option>
-                    <option value="Class3">Class 3</option>
-                    <option value="Class2">Class 2</option>
-                    <option value="Class1">Class 1</option>
+                    <option value="Class6">Class 6 (375)</option>
+                    <option value="Class5">Class 5 (225)</option>
+                    <option value="Class4">Class 4 (150)</option>
+                    <option value="Class3">Class 3 (75)</option>
+                    <option value="Class2">Class 2 (35)</option>
+                    <option value="Class1">Class 1 (0)</option>
                   </select>
                 </div>
+
+
+                {/* Flow for CM still to be implemented in drop down: r1 [groupA or B] -> [Group A finals or B finals or bow out] -> [Group a position or group B position]
+                  Therefore: possible rewards are: group A 1st, 2nd, 3rd; group B 1st, 2nd, 3rd; group A or group B bow out
+                  Also possible to go group A then win 1-2 for group B
+                  implementation to follow after carat values are known
+                */}
 
                 <div className="col dropdown-box">
                   <label htmlFor="champMeeting" className="form-label">Champions Meeting:</label>
