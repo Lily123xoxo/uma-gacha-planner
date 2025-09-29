@@ -1,11 +1,3 @@
-/*
-*
-* TODO:
-* 
-*/
-
-
-
 // ======== CONFIG (UTC) ========
 const RESET_UTC_HOUR = 15;  // daily reset 15:00 UTC
 const RESET_UTC_MIN = 0;

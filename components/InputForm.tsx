@@ -6,7 +6,8 @@ export default function InputForm() {
       <p className="lead text-center mb-3 mt-3">
         Plan your pulls with Uma Planner — a free, easy-to-use timeline and tracker for Uma Musume banners. <br></br>
         Updated with the latest carat values as of 24 September 2025. <br></br>
-        Champions Meeting and Club values will be updated when new carat values are confirmed.
+        Club values will be updated when new carat values are confirmed.
+        N.B. The end date of is used banners for calculations.
       </p>
       
 
