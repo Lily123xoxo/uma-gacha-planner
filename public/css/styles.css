@@ -163,7 +163,7 @@ body
   display: inline-flex;      /* makes the link a flexbox too */
   align-items: center;
   gap: 1rem;
-  padding-top: 1rem;
+  padding: .4rem .7rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--white-text-color);
