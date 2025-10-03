@@ -53,7 +53,7 @@ body {
   min-height: 100vh;
 }
 
-.bg-layer{
+.bg-layer {
   position: fixed;
   inset: -2px;             /* overscan to kill 1px gaps on some GPUs */
   z-index: 0;
@@ -83,8 +83,6 @@ body {
   backface-visibility: hidden;
   transform: translateZ(0);
 }
-
-body, .site-header, #main-body, .site-footer, .site-wrapper { position: relative; z-index: 1; }
 
 #main-body {
   display: flex;
