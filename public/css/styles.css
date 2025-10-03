@@ -115,6 +115,11 @@ body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
   gap: 0.35rem;
 }
 
+.footer-text {
+  display: flex;
+  justify-content: left;
+}
+
 /* Header CSS */
 
 .banner-title {
