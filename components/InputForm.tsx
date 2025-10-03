@@ -72,16 +72,16 @@ export default function InputForm() {
                   <label htmlFor="clubRank" className="form-label">Club Rank:</label>
                   <select id="clubRank" name="clubRank" required className="form-select" defaultValue="">
                     <option value="" disabled>Select a value</option>
-                    <option value="SS">SS (3000)</option>
-                    <option value="Splus">S+ (2400)</option>
-                    <option value="S">S (2100)</option>
-                    <option value="Aplus">A+ (1800)</option>
-                    <option value="A">A (1500)</option>
-                    <option value="Bplus">B+ (1200)</option>
-                    <option value="B">B (900)</option>
-                    <option value="Cplus">C+ (600)</option>
-                    <option value="C">C (300)</option>
-                    <option value="Dplus">D+ (150)</option>
+                    <option value="SS">SS (4500)</option>
+                    <option value="Splus">S+ (3600)</option>
+                    <option value="S">S (3150)</option>
+                    <option value="Aplus">A+ (2700)</option>
+                    <option value="A">A (2250)</option>
+                    <option value="Bplus">B+ (1800)</option>
+                    <option value="B">B (1350)</option>
+                    <option value="Cplus">C+ (900)</option>
+                    <option value="C">C (450)</option>
+                    <option value="Dplus">D+ (225)</option>
                   </select>
                 </div>
 

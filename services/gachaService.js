@@ -5,8 +5,8 @@ const WEEKLY_RESET_DOW = 1; // Monday
 
 // ======== REWARD MAPS / CONSTANTS ========
 const clubRankMap = {
-  SS: 3000, SPLUS: 2400, S: 2100, APLUS: 1800, A: 1500,
-  BPLUS: 1200, B: 900, CPLUS: 600, C: 300, DPLUS: 150
+  SS: 4500, SPLUS: 3600, S: 3150, APLUS: 2700, A: 2250,
+  BPLUS: 1800, B: 1350, CPLUS: 900, C: 450, DPLUS: 225
 };
 
 const teamTrialsRankMap = {
