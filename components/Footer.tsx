@@ -7,8 +7,8 @@ export default function Footer() {
                     Have a feature you would like to see?
                 </a>
             </span>
-            <p className="last-updated">Website was last updated on: 3 October 2025</p>
-            <p className="disclaimer">umaplanner is not affiliated with the developers of Uma Musume. All trademarks and copyrights of Cygames, Inc are their own.</p>
+            <p className="last-updated">Website was last updated on: 3 October 2025 <br></br>
+            umaplanner is not affiliated with the developers of Uma Musume. All trademarks and copyrights of Cygames, Inc are their own.</p>
         </div>
     </footer>
   );
