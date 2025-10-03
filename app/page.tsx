@@ -12,7 +12,9 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <>    
+    <>
+    <div className="site-wrapper">
+
         <Header />
 
       <div id="main-body">
@@ -25,6 +27,8 @@ export default function HomePage() {
       </div>
       
         <Footer />
+        
+      </div>
     </>
   );
 }

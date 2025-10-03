@@ -99,6 +99,10 @@ body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
   min-width: 0;
 }
 
+#main-body {
+  flex: 1 0 auto;
+}
+
 .site-footer {
   margin-top: auto;
   background: #111112;
@@ -106,6 +110,13 @@ body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
   min-height: 110px;
   display: flex;
   flex-direction: column;
+}
+
+.site-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  flex: 1 0 auto;
 }
 
 .footer-inner {
