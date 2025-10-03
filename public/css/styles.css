@@ -119,6 +119,7 @@ body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
 .footer-text {
   display: flex;
   justify-content: start;
+  padding-left: 2.5rem;
 }
 
 /* Header CSS */
