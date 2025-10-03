@@ -7,7 +7,7 @@ export default function Footer() {
                     Have a feature you would like to see?
                 </a>
             </span>
-            <p>Last updated: 3 October 2025</p>
+            <p className="last-updated">Last updated: 3 October 2025</p>
         </div>
     </footer>
   );

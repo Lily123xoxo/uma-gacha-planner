@@ -109,8 +109,10 @@ body, .site-header, #main-body, .site-footer { position: relative; z-index: 1; }
 
 .footer-inner {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
 }
 
 /* Header CSS */
@@ -219,6 +221,11 @@ body
 .form-booleans .left-column {
   flex: 1 1 45%;
   min-width: 250px;
+}
+
+.last-updated {
+  color: var(--white-text-color);
+  font-size: var(--font-size-x-small);
 }
 
 .form-booleans .right-column {
