@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: '%s · Uma Planner',
   },
   description:
-    'Plan your pulls with Uma Planner — a free banner timeline and tracker for the Uma Musume gacha game.',
+    'Plan your pulls and track upcoming banners with Uma Planner — a free timeline and tracker for the Uma Musume gacha game.',
   alternates: { canonical: '/' },
   robots: { index: true, follow: true },
   icons: {

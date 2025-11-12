@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: 'Home',
   description:
-    'Track character and support banners and plan your pulls with Uma Planner.',
+    'Track upcoming character and support banners and plan your pulls with Uma Planner.',
 }
 
 export default function HomePage() {
