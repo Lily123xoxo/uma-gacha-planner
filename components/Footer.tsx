@@ -9,7 +9,7 @@ export default function Footer() {
             </span>
         </div>
         <div className="footer-text">
-            <p className="last-updated">Website was last updated on: 7 November 2025. <br></br>
+            <p className="last-updated">Website was last updated on: 5 December 2025. <br></br>
             Umaplanner is not affiliated with the developers of Uma Musume. All trademarks and copyrights of Cygames, Inc are their own.</p>
         </div>
     </footer>
