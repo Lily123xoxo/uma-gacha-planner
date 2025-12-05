@@ -1,5 +1,3 @@
-// lib/dispatcher/bannerDao.dispatcher.ts
-
 export * from "./bannerBean";
 import type { GroupedBannerDay } from "./bannerBean";
 

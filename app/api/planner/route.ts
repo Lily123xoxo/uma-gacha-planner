@@ -1,4 +1,3 @@
-// app/api/planner/route.ts
 import { NextResponse } from 'next/server';
 import gachaService from '@/services/gachaService';
 

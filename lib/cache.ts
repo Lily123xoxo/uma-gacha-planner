@@ -1,4 +1,3 @@
-// lib/cache.ts
 import { redis } from "./redis";
 
 export async function cacheJSON<T>(

@@ -1,4 +1,3 @@
-// lib/bannerTypes.ts
 export type GroupedBanner = {
   id: number;
   type: "character" | "support";
